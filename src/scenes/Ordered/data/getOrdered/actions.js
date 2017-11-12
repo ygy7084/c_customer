@@ -1,18 +1,19 @@
 /* global fetch */
 import getCookie from '../../../../modules/getCookie';
 
-export const WAITING = 'Main/data/order/WAITING';
-export const SUCCESS = 'Main/data/order/SUCCESS';
-export const FAILURE = 'Main/data/order/FAILURE';
+export const WAITING = 'Main/data/getOrdered/WAITING';
+export const SUCCESS = 'Main/data/getOrdered/SUCCESS';
+export const FAILURE = 'Main/data/getOrdered/FAILURE';
 
 const waiting = () => {
   return {
     type: WAITING,
   };
 };
-const success = () => {
+const success = (ordered) => {
   return {
     type: SUCCESS,
+    ordered,
   };
 };
 const failure = (error) => {
@@ -21,16 +22,15 @@ const failure = (error) => {
     error,
   };
 };
-export const request = (order) => {
+export const request = () => {
   return (dispatch) => {
     dispatch(waiting());
-    return fetch('/api/order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        data: order
-      }),
+    return fetch(`/api/order/${getCookie('order')}`, {
+      method: 'GET',
+      headers: {
+        'pragma': 'no-cache',
+        'cache-control': 'no-cache',
+      },
     })
       .then((res) => {
         if (res.ok) { return res.json(); }

@@ -7,6 +7,7 @@ import {
 
 const initialState = {
   status: 'INIT',
+  ordered: {},
 };
 
 export const reducer = (state = initialState, action) => {
@@ -18,10 +19,12 @@ export const reducer = (state = initialState, action) => {
     case SUCCESS:
       return update(state, {
         status: { $set: 'SUCCESS' },
+        ordered: { $set: action.ordered },
       });
     case FAILURE:
       return update(state, {
         status: { $set: 'FAILURE' },
+        ordered: { $set: {} },
       });
     default:
       return state;

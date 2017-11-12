@@ -1,10 +1,15 @@
-import { combineReducers } from 'redux';
-import { reducer as accountReducer } from './account/reducer';
-import { reducer as shopReducer } from './shop/reducer';
-import { reducer as pictureReducer } from './picture/reducer';
+import _ from 'lodash';
 
-export const reducer = combineReducers({
-  account: accountReducer,
-  shop: shopReducer,
-  picture: pictureReducer,
-});
+import { reducer as dataReducer } from './data/reducer';
+
+const initialState = {};
+export const reducer = (state = initialState, action) => {
+  const rest = _.omit(state, Object.keys(initialState));
+  switch (action.type) {
+    default:
+      return {
+        ...state,
+        data: dataReducer(rest.data, action),
+      };
+  }
+};

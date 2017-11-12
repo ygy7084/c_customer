@@ -2,6 +2,7 @@
   "name": "clientside",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:4000",
   "dependencies": {
     "autoprefixer": "^7.1.2",
     "autosuggest-highlight": "^3.1.1",
@@ -42,6 +43,7 @@
     "react": "^16.0.0",
     "react-addons-update": "^15.6.2",
     "react-autosuggest": "^9.3.2",
+    "react-cookie": "^2.1.1",
     "react-dev-utils": "^4.1.0",
     "react-dom": "^16.0.0",
     "react-icons": "^2.2.7",

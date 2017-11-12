@@ -7,6 +7,7 @@ import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
 import injectTapEventPlugin from 'react-tap-event-plugin';
+import { CookiesProvider } from 'react-cookie';
 import store, { history } from './store';
 import './index.css';
 import App from './App';
@@ -26,7 +27,9 @@ injectTapEventPlugin();
 render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <App />
+      <CookiesProvider>
+        <App />
+      </CookiesProvider>
     </ConnectedRouter>
   </Provider>, document.getElementById('root'));
 registerServiceWorker();

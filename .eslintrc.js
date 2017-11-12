@@ -20,5 +20,6 @@ module.exports = {
     "arrow-body-style":0,
     "no-unused-vars":0,
     "react/no-find-dom-node":0,
+    "func-names":0,
   },
 };

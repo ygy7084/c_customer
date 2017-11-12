@@ -1,4 +1,6 @@
-/* global fetch */
+/* global fetch, document */
+import getCookie from '../../modules/getCookie';
+
 export const WAITING = 'data/auth/WAITING';
 export const SUCCESS = 'data/auth/SUCCESS';
 export const FAILURE = 'data/auth/FAILURE';
@@ -8,10 +10,10 @@ const waiting = () => {
     type: WAITING,
   };
 };
-const success = (user) => {
+const success = (order) => {
   return {
     type: SUCCESS,
-    user,
+    order,
   };
 };
 const failure = (error) => {
@@ -23,12 +25,12 @@ const failure = (error) => {
 export const request = () => {
   return (dispatch) => {
     dispatch(waiting());
-    return fetch('http://localhost:8080/auth', {
+    return fetch('/auth', {
       method: 'GET',
-      credentials: 'include',
       headers: {
         'pragma': 'no-cache',
         'cache-control': 'no-cache',
+        'Authorization': `Bearer ${getCookie('order')}`
       },
     })
       .then((res) => {

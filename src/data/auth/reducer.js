@@ -7,7 +7,7 @@ import {
 
 const initialState = {
   status: 'INIT',
-  user: null,
+  order: null,
 };
 
 export const reducer = (state = initialState, action) => {
@@ -19,12 +19,12 @@ export const reducer = (state = initialState, action) => {
     case SUCCESS:
       return update(state, {
         status: { $set: 'SUCCESS' },
-        user: { $set: action.user },
+        order: { $set: action.order },
       });
     case FAILURE:
       return update(state, {
         status: { $set: 'FAILURE' },
-        user: { $set: null },
+        order: { $set: null },
       });
     default:
       return state;
