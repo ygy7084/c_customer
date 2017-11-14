@@ -34,6 +34,7 @@ class Ordered extends React.Component {
   }
   render() {
     const { datetime, label, orderList } = this.props.getOrdered.ordered;
+    const check = '123';
     return (
       <div>
         <OrderedList
@@ -41,6 +42,33 @@ class Ordered extends React.Component {
           label={label}
           list={orderList}
         />
+        <form onSubmit={e => e.preventDefault()}>
+          <button onClick={() => {
+          //alert(this.props.getOrdered.ordered._id);
+
+            fetch('/api/order/cancel', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+              data: { _id: this.props.getOrdered.ordered._id },
+            }),
+          })
+            .then((res) => {
+              if (res.ok) { this.props.authRequest(); }
+              return res.json().then((error) => {
+                throw error;
+              });
+            })
+
+            //this.props.authRequest();
+          }
+        }>주문취소</button>
+        </form>
+
+
+
+
       </div>
     );
   }
