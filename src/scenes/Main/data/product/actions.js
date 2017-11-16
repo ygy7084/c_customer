@@ -1,16 +1,16 @@
-/* global fetch */
-export const WAITING = 'Main/data/order/WAITING';
-export const SUCCESS = 'Main/data/order/SUCCESS';
-export const FAILURE = 'Main/data/order/FAILURE';
-
+/* global fetch, document */
+export const WAITING = 'Main/data/product/WAITING';
+export const SUCCESS = 'Main/data/product/SUCCESS';
+export const FAILURE = 'Main/data/product/FAILURE';
 const waiting = () => {
   return {
     type: WAITING,
   };
 };
-const success = () => {
+const success = (products) => {
   return {
     type: SUCCESS,
+    products,
   };
 };
 const failure = (error) => {
@@ -19,16 +19,15 @@ const failure = (error) => {
     error,
   };
 };
-export const request = (order) => {
+export const request = () => {
   return (dispatch) => {
     dispatch(waiting());
-    return fetch('/api/order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        data: order
-      }),
+    return fetch('/api/product', {
+      method: 'GET',
+      headers: {
+        'pragma': 'no-cache',
+        'cache-control': 'no-cache',
+      },
     })
       .then((res) => {
         if (res.ok) { return res.json(); }
@@ -48,3 +47,4 @@ export const request = (order) => {
       .catch(e => dispatch(failure(e)));
   };
 };
+

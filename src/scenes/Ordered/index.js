@@ -18,6 +18,7 @@ class Ordered extends React.Component {
         this.props.authRequest();
       }
     });
+    this.handleCancel = this.handleCancel.bind(this);
   }
   componentDidMount() {
     this.props.getOrderedRequest()
@@ -32,9 +33,24 @@ class Ordered extends React.Component {
         console.error(data);
       });
   }
+  handleCancel(ordered){
+    fetch('/api/order/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        data: { _id: ordered._id },
+      }),
+    })
+      .then((res) => {
+        if (res.ok) { this.props.authRequest(); }
+        return res.json().then((error) => {
+          throw error;
+        });
+      })
+  }
   render() {
     const { datetime, label, orderList } = this.props.getOrdered.ordered;
-    const check = '123';
     return (
       <div>
         <OrderedList
@@ -43,32 +59,10 @@ class Ordered extends React.Component {
           list={orderList}
         />
         <form onSubmit={e => e.preventDefault()}>
-          <button onClick={() => {
-          //alert(this.props.getOrdered.ordered._id);
-
-            fetch('/api/order/cancel', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({
-              data: { _id: this.props.getOrdered.ordered._id },
-            }),
-          })
-            .then((res) => {
-              if (res.ok) { this.props.authRequest(); }
-              return res.json().then((error) => {
-                throw error;
-              });
-            })
-
-            //this.props.authRequest();
-          }
-        }>주문취소</button>
+          <button onClick={() => this.handleCancel(this.props.getOrdered.ordered)}>
+            주문취소
+          </button>
         </form>
-
-
-
-
       </div>
     );
   }

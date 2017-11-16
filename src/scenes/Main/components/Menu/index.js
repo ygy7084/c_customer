@@ -1,11 +1,20 @@
 import React from 'react';
 
-const Menu = function ({ selected, select }) {
+const Menu = function ({ list, selected, select }) {
   return (
     <div>
       <ul>
-        <li><button onClick={() => select('아메리카노')}>아메리카노 {selected.indexOf('아메리카노') > -1 ? '취소' : ''}</button></li>
-        <li><button onClick={() => select('카페라떼')}>카페라떼 {selected.indexOf('카페라떼') > -1 ? '취소' : ''}</button></li>
+        {
+          list.map(item =>
+            (
+              <li key={item.name}>
+                <button onClick={() => select(item.name)}>
+                  {item.name} {selected.indexOf(item.name) > -1 ? '취소' : ''}
+                </button>
+              </li>
+            )
+          )
+        }
       </ul>
     </div>
   );

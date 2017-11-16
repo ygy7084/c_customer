@@ -13,6 +13,7 @@ import Ordering from './components/Ordering';
 import * as orderActions from './data/order/actions';
 import * as authActions from '../../data/auth/actions';
 import * as noticeDialogActions from '../../data/noticeDialog/actions';
+import * as productActions from './data/product/actions';
 
 class Main extends React.Component {
   constructor(props) {
@@ -22,6 +23,18 @@ class Main extends React.Component {
     };
     this.select = this.select.bind(this);
     this.order = this.order.bind(this);
+  }
+  componentDidMount() {
+    this.props.productRequest()
+      .then((data) => {
+        if (this.props.product.status === 'SUCCESS') {
+        } else {
+          throw data;
+        }
+      })
+      .catch((data) => {
+        console.error(data);
+      });
   }
   select(menu) {
     const index = this.state.selected.indexOf(menu);
@@ -62,6 +75,7 @@ class Main extends React.Component {
   render() {
     const { changePage } = this.props;
     const { selected } = this.state;
+    const { products } = this.props.state.main.data.product;
     return (
       <Switch>
         <Route
@@ -78,7 +92,7 @@ class Main extends React.Component {
           path="/menu"
           render={() => (
             <div>
-              <Menu selected={selected} select={this.select} />
+              <Menu list={products} selected={selected} select={this.select} />
               <hr />
               <MenuSelected selected={selected} />
               <hr />
@@ -92,6 +106,8 @@ class Main extends React.Component {
 }
 const mapStateToProps = state => ({
   order: state.main.data.order,
+  product: state.main.data.product,
+  state
 });
 const mapDispatchToProps = dispatch => bindActionCreators({
   changePage: path => push(path),
@@ -100,6 +116,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   showError: noticeDialogActions.error,
   orderRequest: orderActions.request,
   authRequest: authActions.request,
+  productRequest: productActions.request,
 }, dispatch);
 export default withRouter(connect(
   mapStateToProps,
