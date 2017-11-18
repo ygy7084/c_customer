@@ -24,7 +24,6 @@ class Ordered extends React.Component {
     this.props.getOrderedRequest()
       .then((data) => {
         if (this.props.getOrdered.status === 'SUCCESS') {
-          console.log(this.props.getOrdered);
         } else {
           throw data;
         }
@@ -50,13 +49,13 @@ class Ordered extends React.Component {
       })
   }
   render() {
-    const { datetime, label, orderList } = this.props.getOrdered.ordered;
+    const { datetime, label, products } = this.props.getOrdered.ordered;
     return (
       <div>
         <OrderedList
           datetime={datetime}
           label={label}
-          list={orderList}
+          list={products}
         />
         <form onSubmit={e => e.preventDefault()}>
           <button onClick={() => this.handleCancel(this.props.getOrdered.ordered)}>

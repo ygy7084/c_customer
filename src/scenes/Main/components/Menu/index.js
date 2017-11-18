@@ -1,6 +1,7 @@
 import React from 'react';
 
 const Menu = function ({ list, selected, select }) {
+  let item = list[3];
   return (
     <div>
       <ul>
@@ -8,8 +9,8 @@ const Menu = function ({ list, selected, select }) {
           list.map(item =>
             (
               <li key={item.name}>
-                <button onClick={() => select(item.name)}>
-                  {item.name} {selected.indexOf(item.name) > -1 ? '취소' : ''}
+                <button onClick={() => select(item)}>
+                  {item.name} {selected.indexOf(item) > -1 ? '취소' : ''}
                 </button>
               </li>
             )

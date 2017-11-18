@@ -27,7 +27,7 @@ export const request = (order) => {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
-        data: order
+        data: order,
       }),
     })
       .then((res) => {

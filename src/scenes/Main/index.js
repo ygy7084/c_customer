@@ -37,7 +37,9 @@ class Main extends React.Component {
       });
   }
   select(menu) {
+
     const index = this.state.selected.indexOf(menu);
+
     if (index > -1) {
       this.setState((prevState) => {
         const newArr = prevState.selected;
@@ -47,10 +49,12 @@ class Main extends React.Component {
     } else {
       this.setState(prevState => ({
         selected: [...prevState.selected, menu],
-      }));
+      }
+      ));
     }
   }
   order(text) {
+    /*
     this.props.noticeDialogOn({
       title: '주문하기',
       text,
@@ -60,6 +64,7 @@ class Main extends React.Component {
           selected: this.state.selected,
         })
           .then((data) => {
+
             if (this.props.order.status === 'SUCCESS') {
               this.props.authRequest();
             } else {
@@ -70,12 +75,28 @@ class Main extends React.Component {
             console.error(data);
           });
       }
-    });
+    });*/
+    this.props.orderRequest({
+      text,
+      selected: this.state.selected,
+    })
+      .then((data) => {
+
+        if (this.props.order.status === 'SUCCESS') {
+          this.props.authRequest();
+        } else {
+          throw data;
+        }
+      })
+      .catch((data) => {
+        console.error(data);
+      });
   }
   render() {
     const { changePage } = this.props;
     const { selected } = this.state;
     const { products } = this.props.state.main.data.product;
+
     return (
       <Switch>
         <Route
