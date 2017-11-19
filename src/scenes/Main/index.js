@@ -54,6 +54,7 @@ class Main extends React.Component {
     }
   }
   order(text) {
+    // 팝업창 오류 때문에 주석처리 후 버튼클릭시 바로 오더 실행되도록 수정
     /*
     this.props.noticeDialogOn({
       title: '주문하기',
@@ -143,3 +144,86 @@ export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps,
 )(Main));
+
+
+// ------------------- 중복 데이터 집계 후 반환 함수 -----------------//
+//sample data
+let original = [
+  {
+    name : 'dohun',
+    age : 26,
+    options : [1,2]
+  },
+  {
+    name : 'minkyeong',
+    age : 20
+  },
+  {
+    name : 'dohun',
+    age : 26,
+    options : [1,2]
+  },
+  {
+    name : 'dohun',
+    age : 26,
+    options : [1,2,3]
+  },
+  {
+    name : 'dohun',
+    age : 26
+  },
+  {
+    name : 'dohun',
+    age : 26
+  },
+];
+
+function abbr(arr){
+  let empty = [];
+// 빈배열 count 초기값
+  for(let k =0 ; k<original.length;k++){
+    empty.push({obj:'', count:1});
+  }
+//json 비교 함수
+  let compare = function(a, b){
+    let i = 0, j;
+    if(typeof a == "object" && a){
+      if(Array.isArray(a)){
+        if(!Array.isArray(b) || a.length != b.length) return false;
+        for(j = a.length ; i < j ; i++) if(!compare(a[i], b[i])) return false;
+        return true;
+      }else{
+        for(j in b) if(b.hasOwnProperty(j)) i++;
+        for(j in a) if(a.hasOwnProperty(j)){
+          if(!compare(a[j], b[j])) return false;
+          i--;
+        }
+        return !i;
+      }
+    }
+    return a === b;
+  };
+// 배열 요소 중복 체크
+  for(let i=0;i<original.length;i++){
+    for(let j=i+1;j<original.length;j++){
+      if(compare(original[i],original[j])){
+        empty[i].obj = original[i];
+        empty[i].count++;
+        original.splice(j,1);
+        j--;
+      }
+    }
+  }
+// index에 맞게 obj 처리
+  for(let i =0; i<original.length;i++){
+    empty[i].obj = original[i];
+  }
+  empty.splice(original.length, empty.length-original.length);
+
+  return empty;
+}
+
+/* 결과 확인
+let result = abbr(original);
+console.log(result);
+*/
