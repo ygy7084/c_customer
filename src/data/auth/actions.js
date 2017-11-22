@@ -1,5 +1,6 @@
 /* global fetch, document */
 import getCookie from '../../modules/getCookie';
+import * as loader from '../../data/loader/actions';
 
 export const WAITING = 'data/auth/WAITING';
 export const SUCCESS = 'data/auth/SUCCESS';
@@ -24,16 +25,18 @@ const failure = (error) => {
 };
 export const request = () => {
   return (dispatch) => {
+    dispatch(loader.on());
     dispatch(waiting());
     return fetch('/auth', {
       method: 'GET',
       headers: {
-        'pragma': 'no-cache',
+        pragma: 'no-cache',
         'cache-control': 'no-cache',
-        'Authorization': `Bearer ${getCookie('order')}`
+        Authorization: `Bearer ${getCookie('order')}`
       },
     })
       .then((res) => {
+        dispatch(loader.off());
         if (res.ok) { return res.json(); }
         return res.json().then((error) => {
           throw error;

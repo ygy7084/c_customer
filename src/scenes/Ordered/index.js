@@ -1,3 +1,4 @@
+/* global fetch */
 import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -23,8 +24,7 @@ class Ordered extends React.Component {
   componentDidMount() {
     this.props.getOrderedRequest()
       .then((data) => {
-        if (this.props.getOrdered.status === 'SUCCESS') {
-        } else {
+        if (this.props.getOrdered.status === 'FAILURE') {
           throw data;
         }
       })
@@ -32,7 +32,7 @@ class Ordered extends React.Component {
         console.error(data);
       });
   }
-  handleCancel(ordered){
+  handleCancel(ordered) {
     fetch('/api/order/cancel', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -46,7 +46,7 @@ class Ordered extends React.Component {
         return res.json().then((error) => {
           throw error;
         });
-      })
+      });
   }
   render() {
     const { datetime, label, products } = this.props.getOrdered.ordered;

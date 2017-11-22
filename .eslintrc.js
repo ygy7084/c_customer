@@ -21,5 +21,6 @@ module.exports = {
     "no-unused-vars":0,
     "react/no-find-dom-node":0,
     "func-names":0,
+    "react/prefer-stateless-function":0,
   },
 };

@@ -26,14 +26,11 @@ const theme = createMuiTheme({
 });
 
 class App extends React.Component {
-  constructor(props) {
-    super(props);
-  }
   componentWillMount() {
     this.props.authRequest();
   }
   render() {
-    const { noticeDialog, auth } = this.props;
+    const { noticeDialog, auth, loader } = this.props;
     return (
       <MuiThemeProvider theme={theme}>
         <div style={{ height: '100%' }}>
@@ -42,13 +39,13 @@ class App extends React.Component {
               <Route
                 path="/"
                 render={
-                props => <Ordered {...props} order={auth.order} />}
+                  props => <Ordered {...props} order={auth.order} />}
               /> : auth.status === 'INIT' || auth.status === 'WAITING' ?
                 null :
                 <Route
                   path="/"
                   render={
-                  props => <Main {...props} />}
+                    props => <Main {...props} />}
                 />
           }
           <SimpleMessage />
@@ -60,7 +57,7 @@ class App extends React.Component {
             onConfirm={noticeDialog.onConfirm}
           />
           {
-            this.props.loading ?
+            loader ?
               <Loader /> : null
           }
         </div>
@@ -71,7 +68,8 @@ class App extends React.Component {
 const mapStateToProps = state => ({
   auth: state.data.auth,
   noticeDialog: state.data.noticeDialog,
-  loading: state.data.loader,
+  loader: state.data.loader,
+  state,
 });
 const mapDispatchToProps = dispatch => bindActionCreators({
   authRequest: authActions.request,

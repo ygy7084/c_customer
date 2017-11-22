@@ -1,7 +1,6 @@
 import React from 'react';
 
 const Menu = function ({ list, selected, select }) {
-  let item = list[3];
   return (
     <div>
       <ul>

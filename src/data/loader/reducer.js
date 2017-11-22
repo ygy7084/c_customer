@@ -1,15 +1,11 @@
-import {
-  WAITING as AUTH_WAITING,
-  SUCCESS as AUTH_SUCCESS,
-  FAILURE as AUTH_FAILURE,
-} from './../auth/actions';
-const initialState = false;
+import { ON, OFF } from './actions';
+
+const initialState = true;
 const loading = (state, action) => {
   switch (action.type) {
-    case AUTH_WAITING:
+    case ON:
       return true;
-    case AUTH_SUCCESS:
-    case AUTH_FAILURE:
+    case OFF:
       return false;
     default:
       return state;

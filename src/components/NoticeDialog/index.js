@@ -30,7 +30,7 @@ const NoticeDialog = function NoticeDialog(
                 취소
               </Button>
             </div>
-              :
+            :
             <Button onClick={onClose} color="primary">
               확인
             </Button>

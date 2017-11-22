@@ -1,4 +1,6 @@
 /* global fetch */
+import * as loader from '../../../../data/loader/actions';
+
 export const WAITING = 'Main/data/order/WAITING';
 export const SUCCESS = 'Main/data/order/SUCCESS';
 export const FAILURE = 'Main/data/order/FAILURE';
@@ -21,6 +23,7 @@ const failure = (error) => {
 };
 export const request = (order) => {
   return (dispatch) => {
+    dispatch(loader.on());
     dispatch(waiting());
     return fetch('/api/order', {
       method: 'POST',
@@ -31,6 +34,7 @@ export const request = (order) => {
       }),
     })
       .then((res) => {
+        dispatch(loader.off());
         if (res.ok) { return res.json(); }
         return res.json().then((error) => {
           throw error;

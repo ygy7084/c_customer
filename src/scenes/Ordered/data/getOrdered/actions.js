@@ -28,7 +28,7 @@ export const request = () => {
     return fetch(`/api/order/${getCookie('order')}`, {
       method: 'GET',
       headers: {
-        'pragma': 'no-cache',
+        pragma: 'no-cache',
         'cache-control': 'no-cache',
       },
     })
