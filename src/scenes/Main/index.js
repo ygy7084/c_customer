@@ -11,7 +11,6 @@ import OrderIcon from 'material-ui-icons/ShoppingCart';
 import MenuIcon from 'material-ui-icons/Menu';
 import ShopIcon from 'material-ui-icons/LocationOn';
 import MyInfoIcon from 'material-ui-icons/AccountBox';
-import TransitionGroup from 'react-transition-group/TransitionGroup';
 import Navigation from './components/Navigation';
 import Shop from './scenes/Shop';
 import Menu from './scenes/Menu';
@@ -20,7 +19,6 @@ import Order from './scenes/Order';
 import * as orderActions from './data/order/actions';
 import * as authActions from '../../data/auth/actions';
 import * as noticeDialogActions from '../../data/noticeDialog/actions';
-import * as productActions from './data/product/actions';
 
 const navigations = [
   {
@@ -58,17 +56,6 @@ class Main extends React.Component {
     this.select = this.select.bind(this);
     this.order = this.order.bind(this);
     this.handleNavigationClick = this.handleNavigationClick.bind(this);
-  }
-  componentDidMount() {
-    this.props.productRequest()
-      .then((data) => {
-        if (this.props.product.status === 'FAILURE') {
-          throw data;
-        }
-      })
-      .catch((data) => {
-        console.error(data);
-      });
   }
   select(menu) {
     const index = this.state.selected.indexOf(menu);
@@ -121,7 +108,7 @@ class Main extends React.Component {
               key={Item.path}
               path={Item.path}
               exact={Item.exact}
-              render={() => <Item.scene /> }
+              render={() => <div style={{ marginBottom: '56px', height: '100%' }}><Item.scene /></div>}
             />
           ))
         }
@@ -131,7 +118,6 @@ class Main extends React.Component {
 }
 const mapStateToProps = state => ({
   order: state.main.data.order,
-  product: state.main.data.product,
 });
 const mapDispatchToProps = dispatch => bindActionCreators({
   changePage: path => push(path),
@@ -140,7 +126,6 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   showError: noticeDialogActions.error,
   orderRequest: orderActions.request,
   authRequest: authActions.request,
-  productRequest: productActions.request,
 }, dispatch);
 export default withRouter(connect(
   mapStateToProps,

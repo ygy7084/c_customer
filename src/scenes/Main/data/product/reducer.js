@@ -1,30 +1,65 @@
 import update from 'react-addons-update';
 import {
-  WAITING,
-  SUCCESS,
-  FAILURE,
+  RETRIEVE_ONE_WAITING,
+  RETRIEVE_ONE_SUCCESS,
+  RETRIEVE_ONE_FAILURE,
+  RETRIEVE_MANY_WAITING,
+  RETRIEVE_MANY_SUCCESS,
+  RETRIEVE_MANY_FAILURE,
 } from './actions';
 
 const initialState = {
-  status: 'INIT',
-  products: [],
+  retrieveOne: {
+    status: 'INIT',
+    product: {},
+  },
+  retrieveMany: {
+    status: 'INIT',
+    products: [],
+  },
 };
 
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case WAITING:
+    case RETRIEVE_ONE_WAITING:
       return update(state, {
-        status: { $set: 'WAITING' },
+        retrieveOne: {
+          status: { $set: 'WAITING' }
+        },
       });
-    case SUCCESS:
+    case RETRIEVE_ONE_SUCCESS:
       return update(state, {
-        status: { $set: 'SUCCESS' },
-        products: { $set: action.products },
+        retrieveOne: {
+          status: { $set: 'SUCCESS' },
+          product: { $set: action.product },
+        },
       });
-    case FAILURE:
+    case RETRIEVE_ONE_FAILURE:
       return update(state, {
-        status: { $set: 'FAILURE' },
-        products: { $set: [] },
+        retrieveOne: {
+          status: { $set: 'FAILURE' },
+          product: { $set: {} }
+        },
+      });
+    case RETRIEVE_MANY_WAITING:
+      return update(state, {
+        retrieveMany: {
+          status: { $set: 'WAITING' },
+        },
+      });
+    case RETRIEVE_MANY_SUCCESS:
+      return update(state, {
+        retrieveMany: {
+          status: { $set: 'SUCCESS' },
+          products: { $set: action.products },
+        },
+      });
+    case RETRIEVE_MANY_FAILURE:
+      return update(state, {
+        retrieveMany: {
+          status: { $set: 'FAILURE' },
+          products: { $set: [] },
+        },
       });
     default:
       return state;

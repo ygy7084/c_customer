@@ -8,14 +8,6 @@ import List, {
   ListItemText,
 } from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
-import IconButton from 'material-ui/IconButton';
-import { FormGroup, FormControlLabel } from 'material-ui/Form';
-import Checkbox from 'material-ui/Checkbox';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import FolderIcon from 'material-ui-icons/Folder';
-import DeleteIcon from 'material-ui-icons/Delete';
-import Divider from 'material-ui/Divider';
 
 const styles = {
   list: {
@@ -26,12 +18,16 @@ const styles = {
     height: 60,
   },
 };
-const MenuList = ({ list, classes }) => {
+const MenuList = ({ list, classes, onClick }) => {
   return (
     <List classes={{ root: classes.list }}>
       {
         list.map(item => (
-          <ListItem key={item.name} button>
+          <ListItem
+            key={item.name}
+            button
+            onClick={() => onClick(item)}
+          >
             <Avatar
               alt="사진"
               src={item.pictures ? item.pictures[0] : null}
