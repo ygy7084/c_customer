@@ -17,6 +17,7 @@ import Menu from './scenes/Menu';
 import MyInfo from './scenes/MyInfo';
 import Order from './scenes/Order';
 import * as orderActions from './data/order/actions';
+import * as shopActions from './data/shop/actions';
 import * as authActions from '../../data/auth/actions';
 import * as noticeDialogActions from '../../data/noticeDialog/actions';
 
@@ -51,48 +52,89 @@ class Main extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selected: [],
+      inStock: [],
     };
-    this.select = this.select.bind(this);
-    this.order = this.order.bind(this);
+    this.shopRetrieveOne = this.shopRetrieveOne.bind(this);
     this.handleNavigationClick = this.handleNavigationClick.bind(this);
+    this.handleStockAdd = this.handleStockAdd.bind(this);
+    this.handleStockCancel = this.handleStockCancel.bind(this);
+    this.handleOrder = this.handleOrder.bind(this);
+    this.shopRetrieveOne();
   }
-  select(menu) {
-    const index = this.state.selected.indexOf(menu);
-
-    if (index > -1) {
-      this.setState((prevState) => {
-        const newArr = prevState.selected;
-        newArr.splice(index, 1);
-        return { selected: newArr };
+  shopRetrieveOne() {
+    this.props.shopRequest()
+      .then((data) => {
+        if (this.props.shop.status === 'FAILURE') {
+          throw data;
+        }
+      })
+      .catch((data) => {
+        this.props.showError(data);
       });
-    } else {
-      this.setState(prevState => ({
-        selected: [...prevState.selected, menu],
-      }
-      ));
-    }
   }
-  order(text) {
+  handleNavigationClick(clicked) {
+    this.props.changePage(clicked.path);
+  }
+  handleStockAdd(stock) {
+    const s = stock;
+    s.id = new Date().getTime();
+    this.setState({
+      inStock: this.state.inStock.concat(s),
+    });
+  }
+  handleStockCancel(id) {
+    const inStock = JSON.parse(JSON.stringify(this.state.inStock));
+    const found = inStock.findIndex(o => o.id === id);
+    inStock.splice(found, 1);
+    this.setState({
+      inStock,
+    });
+  }
+  handleOrder() {
+    const products = [];
+    this.state.inStock.forEach((o) => {
+      const obj = products.find(
+        i =>
+          i.product._id === o.item._id &&
+          JSON.stringify(i.options) === JSON.stringify(o.options));
+      if (obj) {
+        obj.number += o.number;
+      } else {
+        const options = [];
+        o.options.forEach((i) => {
+          options.push(i);
+        });
+        products.push({
+          product: {
+            name: o.item.name,
+            _id: o.item._id,
+          },
+          number: o.number,
+          options,
+        });
+      }
+    });
     this.props.orderRequest({
-      text,
-      selected: this.state.selected,
+      shop: {
+        _id: this.props.shop.shop._id,
+        name: this.props.shop.shop.name,
+      },
+      products,
     })
       .then((data) => {
         if (this.props.order.status === 'SUCCESS') {
+          this.setState({ inStock: [] });
           this.props.authRequest();
         } else {
           throw data;
         }
       })
       .catch((data) => {
-        console.error(data);
+        this.props.showError(data);
       });
   }
-  handleNavigationClick(clicked) {
-    this.props.changePage(clicked.path);
-  }
   render() {
+    const { shop } = this.props;
     return (
       <div style={{ height: '100%' }}>
         <Route render={props => (
@@ -108,7 +150,17 @@ class Main extends React.Component {
               key={Item.path}
               path={Item.path}
               exact={Item.exact}
-              render={() => <div style={{ marginBottom: '56px', height: '100%' }}><Item.scene /></div>}
+              render={() => (
+                <div style={{ marginBottom: '56px', height: '100%' }}>
+                  <Item.scene
+                    handleStockAdd={Item.name === '메뉴' ? this.handleStockAdd : undefined}
+                    handleStockCancel={Item.name === '메뉴' ? this.handleStockCancel : undefined}
+                    handleOrder={Item.name === '메뉴' ? this.handleOrder : undefined}
+                    inStock={this.state.inStock}
+                    shop={shop}
+                  />
+                </div>
+              )}
             />
           ))
         }
@@ -118,6 +170,7 @@ class Main extends React.Component {
 }
 const mapStateToProps = state => ({
   order: state.main.data.order,
+  shop: state.main.data.shop,
 });
 const mapDispatchToProps = dispatch => bindActionCreators({
   changePage: path => push(path),
@@ -126,6 +179,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   showError: noticeDialogActions.error,
   orderRequest: orderActions.request,
   authRequest: authActions.request,
+  shopRequest: shopActions.request,
 }, dispatch);
 export default withRouter(connect(
   mapStateToProps,

@@ -18,7 +18,7 @@ const styles = {
     height: 60,
   },
 };
-const MenuList = ({ list, classes, onClick }) => {
+const MenuList = ({ list, classes, onClick, }) => {
   return (
     <List classes={{ root: classes.list }}>
       {

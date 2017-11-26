@@ -12,17 +12,17 @@ import * as productActions from '../../data/product/actions';
 import MenuList from './components/MenuList';
 import ListBar from './components/ListBar';
 import ItemView from './components/ItemView';
+import OrderSheet from './components/OrderSheet';
 import configure from '../../../../modules/configure';
 
 class Menu extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      inStock: 0,
-    };
     this.productRetrieveMany = this.productRetrieveMany.bind(this);
     this.productRetrieveOne = this.productRetrieveOne.bind(this);
     this.handleProductSelect = this.handleProductSelect.bind(this);
+    this.handleStockAdd = this.handleStockAdd.bind(this);
+    this.handleBuy = this.handleBuy.bind(this);
     this.productRetrieveMany();
   }
   productRetrieveOne(id) {
@@ -41,11 +41,6 @@ class Menu extends React.Component {
       .then((data) => {
         if (this.props.productRetrieveMany.status === 'FAILURE') {
           throw data;
-        } else {
-          this.setState((prevState) => {
-            const { structure } = prevState;
-            return { structure };
-          });
         }
       })
       .catch((data) => {
@@ -55,12 +50,23 @@ class Menu extends React.Component {
   handleProductSelect(product) {
     this.props.changePage(`${this.props.match.url}/${product._id}`);
   }
+  handleStockAdd(stock) {
+    this.props.handleStockAdd(stock);
+    this.props.changePage(`${this.props.match.url}`);
+  }
+  handleBuy(item) {
+    this.props.handleStockAdd(item);
+    this.props.changePage(`${this.props.match.url}/ordersheet`);
+  }
   render() {
     const {
       changePage,
       match,
       productRetrieveOne,
       productRetrieveMany,
+      inStock,
+      handleStockCancel,
+      handleOrder,
     } = this.props;
     let item;
     if (productRetrieveOne.status === 'SUCCESS') {
@@ -71,7 +77,10 @@ class Menu extends React.Component {
     }
     return (
       <div>
-        <ListBar inStock={this.state.inStock} />
+        <ListBar
+          inStock={inStock.length}
+          onStockClick={() => changePage(`${this.props.match.url}/ordersheet`)}
+        />
         <MenuList
           list={JSON.parse(JSON.stringify(productRetrieveMany.products)).map((item) => {
             const temp = item;
@@ -82,17 +91,32 @@ class Menu extends React.Component {
           })}
           onClick={this.handleProductSelect}
         />
-        <Route
-          path={`${match.url}/:id`}
-          render={({ match }) => (
-            <ItemView
-              requestItem={this.productRetrieveOne}
-              item={item}
-              match={match}
-              goBack={() => changePage('/menu')}
-            />
-          )}
-        />
+        <Switch>
+          <Route
+            path={`${match.url}/ordersheet`}
+            render={() => (
+              <OrderSheet
+                inStock={inStock}
+                goBack={() => changePage('/menu')}
+                handleStockCancel={handleStockCancel}
+                handleOrder={handleOrder}
+              />
+            )}
+          />
+          <Route
+            path={`${match.url}/:id`}
+            render={({ match }) => (
+              <ItemView
+                requestItem={this.productRetrieveOne}
+                item={item}
+                match={match}
+                goBack={() => changePage('/menu')}
+                handleStockAdd={this.handleStockAdd}
+                handleBuy={this.handleBuy}
+              />
+            )}
+          />
+        </Switch>
       </div>
     );
   }

@@ -20,7 +20,7 @@ const styles = theme => ({
     marginRight: 20,
   },
 });
-const ListBar = ({ classes, inStock }) => {
+const ListBar = ({ classes, inStock, onStockClick }) => {
   return (
     <div className={classes.root}>
       <AppBar position="static">
@@ -30,7 +30,7 @@ const ListBar = ({ classes, inStock }) => {
           </Typography>
           {
             inStock > 0 ?
-              <IconButton>
+              <IconButton onClick={onStockClick}>
                 <Badge badgeContent={inStock} color="accent">
                   <DoneIcon />
                 </Badge>
