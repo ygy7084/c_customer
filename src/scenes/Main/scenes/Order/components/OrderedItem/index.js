@@ -109,7 +109,7 @@ class OrderedItem extends React.Component {
                     </div> :
                   ordered.status === 1 ?
                     <div className="orderStatus orderStatus_complete">
-                      <Typography type="headline" align="center">
+                      <Typography type="headline" align="center" color="inherit">
                         완료
                       </Typography>
                     </div> : null

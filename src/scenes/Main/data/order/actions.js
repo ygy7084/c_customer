@@ -74,6 +74,7 @@ const getOrderedFailure = (error) => {
 };
 export const getOrderedRequest = (orderCookie) => {
   return (dispatch) => {
+    dispatch(loader.on());
     dispatch(getOrderedWaiting());
     return fetch('/auth', {
       method: 'GET',
@@ -84,6 +85,7 @@ export const getOrderedRequest = (orderCookie) => {
       },
     })
       .then((res) => {
+        dispatch(loader.off());
         if (res.ok) { return res.json(); }
         return res.json().then((error) => {
           throw error;
