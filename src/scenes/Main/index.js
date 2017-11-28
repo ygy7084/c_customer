@@ -65,17 +65,21 @@ class Main extends React.Component {
     this.shopRetrieveOne();
   }
   componentWillMount() {
-    this.getOrderedRequest();
+    const orderCookie = getCookie('order');
+    if (orderCookie && orderCookie !== '') {
+      this.getOrderedRequest(orderCookie);
+    }
   }
-  getOrderedRequest() {
-    this.props.getOrderedRequest()
+  getOrderedRequest(orderCookie) {
+    this.props.getOrderedRequest(orderCookie)
       .then((data) => {
         if (this.props.getOrdered.status === 'SUCCESS') {
           if (!socket) {
             socket = io();
             socket.on('delivered', (_id) => {
-              if (getCookie('order') === _id) {
-                this.getOrderedRequest();
+              const orderCookie = getCookie('order');
+              if (orderCookie === _id) {
+                this.getOrderedRequest(orderCookie);
                 this.props.changePage('/order');
               }
             });

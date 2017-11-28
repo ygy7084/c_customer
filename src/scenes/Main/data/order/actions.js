@@ -1,6 +1,5 @@
 /* global fetch */
 import * as loader from '../../../../data/loader/actions';
-import getCookie from '../../../../modules/getCookie';
 
 export const ORDER_WAITING = 'Main/data/order/ORDER_WAITING';
 export const ORDER_SUCCESS = 'Main/data/order/ORDER_SUCCESS';
@@ -73,7 +72,7 @@ const getOrderedFailure = (error) => {
     error,
   };
 };
-export const getOrderedRequest = () => {
+export const getOrderedRequest = (orderCookie) => {
   return (dispatch) => {
     dispatch(getOrderedWaiting());
     return fetch('/auth', {
@@ -81,7 +80,7 @@ export const getOrderedRequest = () => {
       headers: {
         pragma: 'no-cache',
         'cache-control': 'no-cache',
-        Authorization: `Bearer ${getCookie('order')}`
+        Authorization: `Bearer ${orderCookie}`
       },
     })
       .then((res) => {
