@@ -95,7 +95,7 @@ class Main extends React.Component {
     this.state.inStock.forEach((o) => {
       const obj = products.find(
         i =>
-          i.product._id === o.item._id &&
+          i._id === o.item._id &&
           JSON.stringify(i.options) === JSON.stringify(o.options));
       if (obj) {
         obj.number += o.number;
@@ -105,11 +105,10 @@ class Main extends React.Component {
           options.push(i);
         });
         products.push({
-          product: {
-            name: o.item.name,
-            _id: o.item._id,
-          },
+          name: o.item.name,
+          _id: o.item._id,
           number: o.number,
+          price: o.item.price,
           options,
         });
       }
@@ -169,7 +168,7 @@ class Main extends React.Component {
   }
 }
 const mapStateToProps = state => ({
-  order: state.main.data.order,
+  order: state.main.data.order.order,
   shop: state.main.data.shop,
 });
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -177,7 +176,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   noticeDialogOn: noticeDialogActions.on,
   noticeDialogOff: noticeDialogActions.off,
   showError: noticeDialogActions.error,
-  orderRequest: orderActions.request,
+  orderRequest: orderActions.orderRequest,
   authRequest: authActions.request,
   shopRequest: shopActions.request,
 }, dispatch);

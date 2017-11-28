@@ -1,27 +1,35 @@
 import update from 'react-addons-update';
 import {
-  WAITING,
-  SUCCESS,
-  FAILURE,
+  ORDER_WAITING,
+  ORDER_SUCCESS,
+  ORDER_FAILURE,
 } from './actions';
 
 const initialState = {
-  status: 'INIT',
+  order: {
+    status: 'INIT',
+  },
 };
 
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case WAITING:
+    case ORDER_WAITING:
       return update(state, {
-        status: { $set: 'WAITING' }
+        order: {
+          status: { $set: 'WAITING' }
+        },
       });
-    case SUCCESS:
+    case ORDER_SUCCESS:
       return update(state, {
-        status: { $set: 'SUCCESS' },
+        order: {
+          status: { $set: 'SUCCESS' },
+        },
       });
-    case FAILURE:
+    case ORDER_FAILURE:
       return update(state, {
-        status: { $set: 'FAILURE' },
+        order: {
+          status: { $set: 'FAILURE' },
+        },
       });
     default:
       return state;

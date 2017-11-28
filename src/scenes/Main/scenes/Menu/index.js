@@ -122,7 +122,7 @@ class Menu extends React.Component {
   }
 }
 const mapStateToProps = state => ({
-  order: state.main.data.order,
+  order: state.main.data.order.order,
   productRetrieveOne: state.main.data.product.retrieveOne,
   productRetrieveMany: state.main.data.product.retrieveMany,
 });
