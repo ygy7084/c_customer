@@ -161,7 +161,8 @@ class Main extends React.Component {
       .then((data) => {
         if (this.props.order.status === 'SUCCESS') {
           this.setState({ inStock: [] });
-          this.getOrderedRequest();
+          const orderCookie = getCookie('order');
+          this.getOrderedRequest(orderCookie);
         } else {
           throw data;
         }
@@ -188,7 +189,7 @@ class Main extends React.Component {
               path={Item.path}
               exact={Item.exact}
               render={() => (
-                <div style={{ marginBottom: '56px', height: '100%' }}>
+                <div style={{ height: '100%' }}>
                   <Item.scene
                     handleStockAdd={Item.name === '메뉴' ? this.handleStockAdd : undefined}
                     handleStockCancel={Item.name === '메뉴' ? this.handleStockCancel : undefined}

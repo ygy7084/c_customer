@@ -26,7 +26,6 @@ const styles = theme => ({
 class OrderedItem extends React.Component {
   render() {
     const { classes, ordered } = this.props;
-    console.log(ordered);
     return (
       <div>
         <div className={classes.appBarWrapper}>
@@ -97,6 +96,9 @@ class OrderedItem extends React.Component {
                 }
                 <Typography type="subheading" align="center">
                   {`총액: ${ordered.wholePrice}`}
+                </Typography>
+                <Typography type="subheading" align="center">
+                  {new Date(ordered.datetime).toLocaleString()}
                 </Typography>
                 {
                   ordered.status === 0 ?
