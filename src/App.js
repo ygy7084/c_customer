@@ -8,10 +8,8 @@ import {
   Route,
   withRouter,
 } from 'react-router-dom';
-import * as authActions from './data/auth/actions';
 import * as noticeDialogActions from './data/noticeDialog/actions';
 import Main from './scenes/Main';
-import Ordered from './scenes/Ordered';
 import { SimpleMessage } from './components/SimpleMessage';
 import NoticeDialog from './components/NoticeDialog';
 import Loader from './components/Loader';
@@ -26,28 +24,16 @@ const theme = createMuiTheme({
 });
 
 class App extends React.Component {
-  componentWillMount() {
-    this.props.authRequest();
-  }
   render() {
-    const { noticeDialog, auth, loader } = this.props;
+    const { noticeDialog, loader } = this.props;
     return (
       <MuiThemeProvider theme={theme}>
         <div style={{ height: '100%' }}>
-          {
-            this.props.auth.order ?
-              <Route
-                path="/"
-                render={
-                  props => <Ordered {...props} order={auth.order} />}
-              /> : auth.status === 'INIT' || auth.status === 'WAITING' ?
-                null :
-                <Route
-                  path="/"
-                  render={
-                    props => <Main {...props} />}
-                />
-          }
+          <Route
+            path="/"
+            render={
+              props => <Main {...props} />}
+          />
           <SimpleMessage />
           <NoticeDialog
             open={noticeDialog.open}
@@ -66,13 +52,10 @@ class App extends React.Component {
   }
 }
 const mapStateToProps = state => ({
-  auth: state.data.auth,
   noticeDialog: state.data.noticeDialog,
   loader: state.data.loader,
-  state,
 });
 const mapDispatchToProps = dispatch => bindActionCreators({
-  authRequest: authActions.request,
   noticeDialogOn: noticeDialogActions.on,
   noticeDialogOff: noticeDialogActions.off,
 }, dispatch);

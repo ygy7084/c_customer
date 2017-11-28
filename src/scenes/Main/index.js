@@ -11,6 +11,7 @@ import OrderIcon from 'material-ui-icons/ShoppingCart';
 import MenuIcon from 'material-ui-icons/Menu';
 import ShopIcon from 'material-ui-icons/LocationOn';
 import MyInfoIcon from 'material-ui-icons/AccountBox';
+import io from 'socket.io-client';
 import Navigation from './components/Navigation';
 import Shop from './scenes/Shop';
 import Menu from './scenes/Menu';
@@ -18,9 +19,10 @@ import MyInfo from './scenes/MyInfo';
 import Order from './scenes/Order';
 import * as orderActions from './data/order/actions';
 import * as shopActions from './data/shop/actions';
-import * as authActions from '../../data/auth/actions';
 import * as noticeDialogActions from '../../data/noticeDialog/actions';
+import getCookie from '../../modules/getCookie';
 
+let socket;
 const navigations = [
   {
     name: '매장',
@@ -54,12 +56,40 @@ class Main extends React.Component {
     this.state = {
       inStock: [],
     };
+    this.getOrderedRequest = this.getOrderedRequest.bind(this);
     this.shopRetrieveOne = this.shopRetrieveOne.bind(this);
     this.handleNavigationClick = this.handleNavigationClick.bind(this);
     this.handleStockAdd = this.handleStockAdd.bind(this);
     this.handleStockCancel = this.handleStockCancel.bind(this);
     this.handleOrder = this.handleOrder.bind(this);
     this.shopRetrieveOne();
+  }
+  componentWillMount() {
+    this.getOrderedRequest();
+  }
+  getOrderedRequest() {
+    this.props.getOrderedRequest()
+      .then((data) => {
+        if (this.props.getOrdered.status === 'SUCCESS') {
+          if (!socket) {
+            socket = io();
+            socket.on('delivered', (_id) => {
+              if (getCookie('order') === _id) {
+                this.getOrderedRequest();
+                this.props.changePage('/order');
+              }
+            });
+          }
+          if (this.props.getOrdered.ordered.status === 0) {
+            this.props.changePage('/order');
+          }
+        } else if (data.error) {
+          throw data;
+        }
+      })
+      .catch((data) => {
+        this.props.showError(data);
+      });
   }
   shopRetrieveOne() {
     this.props.shopRequest()
@@ -92,6 +122,7 @@ class Main extends React.Component {
   }
   handleOrder() {
     const products = [];
+    let wholePrice = 0;
     this.state.inStock.forEach((o) => {
       const obj = products.find(
         i =>
@@ -99,6 +130,7 @@ class Main extends React.Component {
           JSON.stringify(i.options) === JSON.stringify(o.options));
       if (obj) {
         obj.number += o.number;
+        wholePrice += o.basePrice * o.number;
       } else {
         const options = [];
         o.options.forEach((i) => {
@@ -111,6 +143,7 @@ class Main extends React.Component {
           price: o.item.price,
           options,
         });
+        wholePrice += o.basePrice * o.number;
       }
     });
     this.props.orderRequest({
@@ -119,11 +152,12 @@ class Main extends React.Component {
         name: this.props.shop.shop.name,
       },
       products,
+      wholePrice,
     })
       .then((data) => {
         if (this.props.order.status === 'SUCCESS') {
           this.setState({ inStock: [] });
-          this.props.authRequest();
+          this.getOrderedRequest();
         } else {
           throw data;
         }
@@ -133,7 +167,7 @@ class Main extends React.Component {
       });
   }
   render() {
-    const { shop } = this.props;
+    const { shop, getOrdered } = this.props;
     return (
       <div style={{ height: '100%' }}>
         <Route render={props => (
@@ -156,6 +190,7 @@ class Main extends React.Component {
                     handleStockCancel={Item.name === '메뉴' ? this.handleStockCancel : undefined}
                     handleOrder={Item.name === '메뉴' ? this.handleOrder : undefined}
                     inStock={this.state.inStock}
+                    ordered={Item.name === '주문' ? getOrdered.ordered : undefined}
                     shop={shop}
                   />
                 </div>
@@ -169,6 +204,7 @@ class Main extends React.Component {
 }
 const mapStateToProps = state => ({
   order: state.main.data.order.order,
+  getOrdered: state.main.data.order.getOrdered,
   shop: state.main.data.shop,
 });
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -177,7 +213,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   noticeDialogOff: noticeDialogActions.off,
   showError: noticeDialogActions.error,
   orderRequest: orderActions.orderRequest,
-  authRequest: authActions.request,
+  getOrderedRequest: orderActions.getOrderedRequest,
   shopRequest: shopActions.request,
 }, dispatch);
 export default withRouter(connect(

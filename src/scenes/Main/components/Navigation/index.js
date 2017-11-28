@@ -18,14 +18,23 @@ const styles = theme => ({
 class Navigation extends React.Component {
   constructor(props) {
     super(props);
-    let found = this.props.items.find(i =>
-      i.path !== '/' && this.props.location.pathname.indexOf(i.path) === 0
-    );
-    if (!found) found = this.props.items.find(i => i.path === '/');
-    this.state = {
-      selected: found.name || '',
-    };
+    this.handlePath = this.handlePath.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.state = {
+      selected: this.handlePath(this.props).name || '',
+    };
+  }
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      selected: this.handlePath(nextProps).name || '',
+    });
+  }
+  handlePath(props) {
+    let found = props.items.find(i =>
+      i.path !== '/' && props.location.pathname.indexOf(i.path) === 0
+    );
+    if (!found) found = props.items.find(i => i.path === '/');
+    return found;
   }
   handleClick(e, v) {
     this.setState({ selected: v });

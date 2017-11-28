@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import io from 'socket.io-client';
 import OrderedList from './components/OrderedList';
-import * as authActions from '../../data/auth/actions';
 import * as getOrderedActions from './data/getOrdered/actions';
 import * as noticeDialogActions from '../../data/noticeDialog/actions';
 import getCookie from '../../modules/getCookie';

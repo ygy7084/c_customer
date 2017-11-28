@@ -1,0 +1,11 @@
+.orderStatus {
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px; }
+
+.orderStatus_waiting {
+  background: bisque; }
+
+.orderStatus_complete {
+  color: white;
+  background: dodgerblue; }

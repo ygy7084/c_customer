@@ -11,7 +11,7 @@ import {
 const initialState = {
   retrieveOne: {
     status: 'INIT',
-    product: {},
+    product: undefined,
   },
   retrieveMany: {
     status: 'INIT',
@@ -38,7 +38,7 @@ export const reducer = (state = initialState, action) => {
       return update(state, {
         retrieveOne: {
           status: { $set: 'FAILURE' },
-          product: { $set: {} }
+          product: { $set: undefined }
         },
       });
     case RETRIEVE_MANY_WAITING:

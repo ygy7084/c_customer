@@ -147,7 +147,7 @@ class ItemView extends React.Component {
                   fullWidth
                   value={this.state.orderNumber}
                   onChange={e => this.setState({
-                    orderNumber: e.target.value > 1 ? e.target.value : 1,
+                    orderNumber: e.target.value > 1 ? parseInt(e.target.value, 10) : 1,
                   })}
                   type="number"
                   InputLabelProps={{

@@ -3,9 +3,10 @@ import OrderedItem from './components/OrderedItem';
 
 class Order extends React.Component {
   render() {
+    const { ordered } = this.props;
     return (
       <div>
-        <OrderedItem />
+        <OrderedItem ordered={ordered} />
       </div>
     );
   }

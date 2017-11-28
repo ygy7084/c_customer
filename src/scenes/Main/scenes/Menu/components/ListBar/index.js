@@ -3,7 +3,6 @@ import { withStyles } from 'material-ui/styles';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
 import Badge from 'material-ui/Badge';
 import DoneIcon from 'material-ui-icons/ShoppingCart';
 import IconButton from 'material-ui/IconButton';
@@ -25,7 +24,7 @@ const ListBar = ({ classes, inStock, onStockClick }) => {
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
-          <Typography type="title" color="inherit" className={classes.flex}>
+          <Typography type="title" color="inherit" align="center" className={classes.flex}>
             메뉴 주문하기
           </Typography>
           {

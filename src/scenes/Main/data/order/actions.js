@@ -76,11 +76,12 @@ const getOrderedFailure = (error) => {
 export const getOrderedRequest = () => {
   return (dispatch) => {
     dispatch(getOrderedWaiting());
-    return fetch(`/api/order/${getCookie('order')}`, {
+    return fetch('/auth', {
       method: 'GET',
       headers: {
         pragma: 'no-cache',
         'cache-control': 'no-cache',
+        Authorization: `Bearer ${getCookie('order')}`
       },
     })
       .then((res) => {
