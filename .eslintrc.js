@@ -22,5 +22,6 @@ module.exports = {
     "react/no-find-dom-node":0,
     "func-names":0,
     "react/prefer-stateless-function":0,
+    "react/no-did-mount-set-state":0,
   },
 };

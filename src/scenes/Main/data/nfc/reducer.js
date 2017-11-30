@@ -1,37 +1,37 @@
 import update from 'react-addons-update';
 import {
-  GET_SHOP_WAITING,
-  GET_SHOP_SUCCESS,
-  GET_SHOP_FAILURE,
+  GET_NFC_WAITING,
+  GET_NFC_SUCCESS,
+  GET_NFC_FAILURE,
 } from './actions';
 
 const initialState = {
-  getShop: {
+  getNfc: {
     status: 'INIT',
-    shop: undefined,
+    nfc: undefined,
   },
 };
 
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case GET_SHOP_WAITING:
+    case GET_NFC_WAITING:
       return update(state, {
-        getShop: {
+        getNfc: {
           status: { $set: 'WAITING' },
         },
       });
-    case GET_SHOP_SUCCESS:
+    case GET_NFC_SUCCESS:
       return update(state, {
-        getShop: {
+        getNfc: {
           status: { $set: 'SUCCESS' },
-          shop: { $set: action.shop },
+          nfc: { $set: action.nfc },
         },
       });
-    case GET_SHOP_FAILURE:
+    case GET_NFC_FAILURE:
       return update(state, {
-        getShop: {
+        getNfc: {
           status: { $set: 'FAILURE' },
-          shop: { $set: undefined },
+          nfc: { $set: undefined },
         },
       });
     default:

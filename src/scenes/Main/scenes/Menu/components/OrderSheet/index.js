@@ -35,7 +35,7 @@ const styles = theme => ({
 class OrderSheet extends React.Component {
   render() {
     const {
-      classes, goBack, fullScreen, inStock, handleStockCancel, handleOrder
+      classes, goBack, fullScreen, inStock, handleStockCancel, handleOrderStart
     } = this.props;
     let wholePrice = 0;
     inStock.forEach((order) => {
@@ -102,7 +102,7 @@ class OrderSheet extends React.Component {
               classes={{
                 root: classes.fullWidth,
               }}
-              onClick={handleOrder}
+              onClick={handleOrderStart}
               disabled={!inStock.length}
             >
               구매하기

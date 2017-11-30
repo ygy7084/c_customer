@@ -5,6 +5,7 @@ import {
   Route,
   Switch,
   withRouter,
+  Redirect,
 } from 'react-router-dom';
 import { push } from 'react-router-redux';
 import * as noticeDialogActions from '../../../../data/noticeDialog/actions';
@@ -66,7 +67,7 @@ class Menu extends React.Component {
       productRetrieveMany,
       inStock,
       handleStockCancel,
-      handleOrder,
+      handleOrderStart,
     } = this.props;
     let item;
     if (productRetrieveOne.status === 'SUCCESS') {
@@ -95,12 +96,14 @@ class Menu extends React.Component {
           <Route
             path={`${match.url}/ordersheet`}
             render={() => (
-              <OrderSheet
-                inStock={inStock}
-                goBack={() => changePage('/menu')}
-                handleStockCancel={handleStockCancel}
-                handleOrder={handleOrder}
-              />
+              inStock.length ?
+                <OrderSheet
+                  inStock={inStock}
+                  goBack={() => changePage('/menu')}
+                  handleStockCancel={handleStockCancel}
+                  handleOrderStart={handleOrderStart}
+                /> :
+                <Redirect to={`${match.url}`} />
             )}
           />
           <Route

@@ -1,32 +1,31 @@
 /* global fetch */
 import * as loader from '../../../../data/loader/actions';
 
-export const GET_SHOP_WAITING = 'Main/data/shop/GET_SHOP_WAITING';
-export const GET_SHOP_SUCCESS = 'Main/data/shop/GET_SHOP_SUCCESS';
-export const GET_SHOP_FAILURE = 'Main/data/shop/GET_SHOP_FAILURE';
-
-const getShopWaiting = () => {
+export const GET_NFC_WAITING = 'Main/data/nfc/GET_NFC_WAITING';
+export const GET_NFC_SUCCESS = 'Main/data/nfc/GET_NFC_SUCCESS';
+export const GET_NFC_FAILURE = 'Main/data/nfc/GET_NFC_FAILURE';
+const getNfcWaiting = () => {
   return {
-    type: GET_SHOP_WAITING,
+    type: GET_NFC_WAITING,
   };
 };
-const getShopSuccess = (shop) => {
+const getNfcSuccess = (nfc) => {
   return {
-    type: GET_SHOP_SUCCESS,
-    shop,
+    type: GET_NFC_SUCCESS,
+    nfc,
   };
 };
-const getShopFailure = (error) => {
+const getNfcFailure = (error) => {
   return {
-    type: GET_SHOP_FAILURE,
+    type: GET_NFC_FAILURE,
     error,
   };
 };
-export const getShopRequest = () => {
+export const getNfcRequest = (nfcId) => {
   return (dispatch) => {
     dispatch(loader.on());
-    dispatch(getShopWaiting());
-    return fetch('/api/shop', {
+    dispatch(getNfcWaiting());
+    return fetch(`/api/nfc/${nfcId}`, {
       method: 'GET',
       headers: {
         'cache-control': 'no-cache',
@@ -41,13 +40,14 @@ export const getShopRequest = () => {
       })
       .then((res) => {
         if (res.data) {
-          return dispatch(getShopSuccess(res.data));
+          return dispatch(getNfcSuccess(res.data));
         }
-        return dispatch(getShopFailure({
+        return dispatch(getNfcFailure({
           error: null,
           message: 'response에 data 프로퍼티가 없습니다.'
         }));
       })
-      .catch(e => dispatch(getShopFailure(e)));
+      .catch(e => dispatch(getNfcFailure(e)));
   };
 };
+

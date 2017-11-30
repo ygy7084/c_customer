@@ -22,7 +22,6 @@ const theme = createMuiTheme({
     error: red,
   },
 });
-
 class App extends React.Component {
   render() {
     const { noticeDialog, loader } = this.props;

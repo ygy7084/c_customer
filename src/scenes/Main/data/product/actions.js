@@ -33,7 +33,6 @@ export const retrieveOneRequest = (_id) => {
     dispatch(retrieveOneWaiting());
     return fetch(`${configure.API}/product/${_id}`, {
       method: 'GET',
-      credentials: 'include',
       headers: {
         'cache-control': 'no-cache',
       },
@@ -80,7 +79,6 @@ export const retrieveManyRequest = () => {
     dispatch(retrieveManyWaiting());
     return fetch(`${configure.API}/product`, {
       method: 'GET',
-      credentials: 'include',
       headers: {
         'cache-control': 'no-cache',
       },
