@@ -268,9 +268,9 @@ class Main extends React.Component {
   handleOrder() {
     const { customer } = this.props.getCustomer;
     const { nfc } = this.props.getNfc;
-    const place;
+    let place;
     if (nfc) {
-      place = nfc.place || place;
+      place = nfc.place || undefined;
     }
     const { shop } = this.props.getShop;
     const products = [];
