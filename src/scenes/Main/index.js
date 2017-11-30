@@ -268,6 +268,10 @@ class Main extends React.Component {
   handleOrder() {
     const { customer } = this.props.getCustomer;
     const { nfc } = this.props.getNfc;
+    const place;
+    if (nfc) {
+      place = nfc.place || place;
+    }
     const { shop } = this.props.getShop;
     const products = [];
     let wholePrice = 0;
@@ -297,7 +301,7 @@ class Main extends React.Component {
     this.props.orderRequest({
       shop,
       nfc,
-      place: nfc.place || undefined,
+      place,
       customer,
       products,
       wholePrice,
@@ -317,7 +321,6 @@ class Main extends React.Component {
   }
   render() {
     const { getShop, getOrdered, getNfc } = this.props;
-    console.log(this.props);
     return (
       <div style={{ height: '100%' }}>
         <Route render={props => (
