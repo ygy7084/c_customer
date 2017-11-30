@@ -23,6 +23,14 @@ const getNfcFailure = (error) => {
 };
 export const getNfcRequest = (nfcId) => {
   return (dispatch) => {
+    if (!nfcId) {
+      return new Promise((resolve) => {
+        resolve(dispatch(getNfcFailure({
+          error: null,
+          message: '클라이언트 NFC 정보 제거 완료',
+        })));
+      });
+    }
     dispatch(loader.on());
     dispatch(getNfcWaiting());
     return fetch(`/api/nfc/${nfcId}`, {

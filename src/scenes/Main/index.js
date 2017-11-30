@@ -12,6 +12,7 @@ import MenuIcon from 'material-ui-icons/Menu';
 import ShopIcon from 'material-ui-icons/LocationOn';
 import MyInfoIcon from 'material-ui-icons/AccountBox';
 import io from 'socket.io-client';
+import Cookies from 'js-cookie';
 import Navigation from './components/Navigation';
 import NfcConfirm from './components/NfcConfirm';
 import CustomerConfirm from './components/CustomerConfirm';
@@ -24,7 +25,6 @@ import * as shopActions from './data/shop/actions';
 import * as nfcActions from './data/nfc/actions';
 import * as customerActions from './data/customer/actions';
 import * as noticeDialogActions from '../../data/noticeDialog/actions';
-import getCookie from '../../modules/getCookie';
 
 let socket;
 const navigations = [
@@ -81,15 +81,15 @@ class Main extends React.Component {
   }
   componentWillMount() {
     this.shopRetrieveOne();
-    const orderCookie = getCookie('order');
+    const orderCookie = Cookies.get('order');
     if (orderCookie && orderCookie !== '') {
       this.getOrdered(orderCookie);
     }
-    const nfcCookie = getCookie('nfc');
+    const nfcCookie = Cookies.get('nfc');
     if (nfcCookie && nfcCookie !== '') {
       this.getNfc(nfcCookie);
     }
-    const customerCookie = getCookie('customer');
+    const customerCookie = Cookies.get('customer');
     if (customerCookie && customerCookie !== '') {
       this.getCustomer(customerCookie);
     }
@@ -101,7 +101,7 @@ class Main extends React.Component {
           if (!socket) {
             socket = io();
             socket.on('delivered', (_id) => {
-              const orderCookie = getCookie('order');
+              const orderCookie = Cookies.get('order');
               if (orderCookie === _id) {
                 this.getOrdered(orderCookie);
                 this.props.changePage('/order');
@@ -217,19 +217,26 @@ class Main extends React.Component {
     }
   }
   handleNfcNotConfirm() {
-    const { customer } = this.props.getCustomer;
-    if (customer) {
-      this.setState({
-        nfcConfirmShow: false,
+    Cookies.remove('nfc');
+    this.props.getNfcRequest()
+      .then(() => {
+        const { customer } = this.props.getCustomer;
+        if (customer) {
+          this.setState({
+            nfcConfirmShow: false,
+          });
+          this.handleOrder();
+        } else {
+          this.setState({
+            nfcConfirmShow: false,
+            customerConfirmShow: true,
+            customerConfirmPhoneRequired: true,
+          });
+        }
+      })
+      .catch((data) => {
+        this.props.showError(data);
       });
-      this.handleOrder();
-    } else {
-      this.setState({
-        nfcConfirmShow: false,
-        customerConfirmShow: true,
-        customerConfirmPhoneRequired: true,
-      });
-    }
   }
   handleCustomerConfirm(phone) {
     this.props.inputCustomerPhoneRequest(phone)
@@ -237,7 +244,7 @@ class Main extends React.Component {
         if (this.props.inputCustomerPhone.status === 'FAILURE') {
           throw data;
         } else {
-          const customerCookie = getCookie('customer');
+          const customerCookie = Cookies.get('customer');
           if (customerCookie && customerCookie !== '') {
             this.props.getCustomerRequest(customerCookie)
               .then((data) => {
@@ -309,7 +316,7 @@ class Main extends React.Component {
       .then((data) => {
         if (this.props.order.status === 'SUCCESS') {
           this.setState({ inStock: [] });
-          const orderCookie = getCookie('order');
+          const orderCookie = Cookies.get('order');
           this.getOrdered(orderCookie);
         } else {
           throw data;
