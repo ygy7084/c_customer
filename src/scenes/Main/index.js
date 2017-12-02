@@ -78,9 +78,6 @@ class Main extends React.Component {
     this.handleCustomerNotConfirm = this.handleCustomerNotConfirm.bind(this);
     this.handleOrder = this.handleOrder.bind(this);
     this.shopRetrieveOne();
-  }
-  componentWillMount() {
-    this.shopRetrieveOne();
     const orderCookie = Cookies.get('order');
     if (orderCookie && orderCookie !== '') {
       this.getOrdered(orderCookie);

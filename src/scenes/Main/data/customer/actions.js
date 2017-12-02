@@ -23,6 +23,14 @@ const getCustomerFailure = (error) => {
 };
 export const getCustomerRequest = (customerId) => {
   return (dispatch) => {
+    if (!customerId) {
+      return new Promise((resolve) => {
+        resolve(dispatch(getCustomerFailure({
+          error: null,
+          message: '클라이언트 Customer 정보 제거 완료',
+        })));
+      });
+    }
     dispatch(loader.on());
     dispatch(getCustomerWaiting());
     return fetch(`/api/customer/${customerId}`, {

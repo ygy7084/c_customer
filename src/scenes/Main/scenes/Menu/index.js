@@ -8,10 +8,13 @@ import {
   Redirect,
 } from 'react-router-dom';
 import { push } from 'react-router-redux';
+import Badge from 'material-ui/Badge';
+import DoneIcon from 'material-ui-icons/ShoppingCart';
+import IconButton from 'material-ui/IconButton';
 import * as noticeDialogActions from '../../../../data/noticeDialog/actions';
 import * as productActions from '../../data/product/actions';
 import MenuList from './components/MenuList';
-import ListBar from './components/ListBar';
+import TitleBar from '../../components/TitleBar';
 import ItemView from './components/ItemView';
 import OrderSheet from './components/OrderSheet';
 import configure from '../../../../modules/configure';
@@ -78,10 +81,7 @@ class Menu extends React.Component {
     }
     return (
       <div>
-        <ListBar
-          inStock={inStock.length}
-          onStockClick={() => changePage(`${this.props.match.url}/ordersheet`)}
-        />
+        <TitleBar title="메뉴 주문하기" />
         <MenuList
           list={JSON.parse(JSON.stringify(productRetrieveMany.products)).map((item) => {
             const temp = item;

@@ -9,3 +9,7 @@
 .orderStatus_complete {
   color: white;
   background: dodgerblue; }
+
+.noOrderedItem {
+  position: relative;
+  top: 20%; }

@@ -2,15 +2,13 @@ import React from 'react';
 import { withStyles } from 'material-ui/styles';
 import List, {
   ListItem,
-  ListItemAvatar,
-  ListItemIcon,
-  ListItemSecondaryAction,
   ListItemText,
 } from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
 
 const styles = {
   list: {
+    paddingTop: '0px',
     marginBottom: '50px',
   },
   bigAvatar: {

@@ -14,15 +14,11 @@ const styles = theme => ({
   flex: {
     flex: 1,
   },
-  menuButton: {
-    marginLeft: -12,
-    marginRight: 20,
-  },
 });
 const ListBar = ({ classes, inStock, onStockClick }) => {
   return (
     <div className={classes.root}>
-      <AppBar position="static">
+      <AppBar position="static" elevation={0}>
         <Toolbar>
           <Typography type="title" color="inherit" align="center" className={classes.flex}>
             메뉴 주문하기
