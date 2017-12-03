@@ -13,6 +13,7 @@ const styles = theme => ({
     width: '100%',
     position: 'relative',
     margin: 'auto',
+    marginBottom: '50px',
   },
   listSection: {
     textAlign: 'center',

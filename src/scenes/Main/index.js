@@ -25,6 +25,7 @@ import * as shopActions from './data/shop/actions';
 import * as nfcActions from './data/nfc/actions';
 import * as customerActions from './data/customer/actions';
 import * as noticeDialogActions from '../../data/noticeDialog/actions';
+import * as pushConfig from '../../pushConfig';
 
 let socket;
 const navigations = [
@@ -309,6 +310,11 @@ class Main extends React.Component {
       customer,
       products,
       wholePrice,
+      endPoint: pushConfig.get('endPoint'),
+      keys: {
+        key: pushConfig.get('key'),
+        authSecret: pushConfig.get('authSecret'),
+      },
     })
       .then((data) => {
         if (this.props.order.status === 'SUCCESS') {

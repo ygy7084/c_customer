@@ -24,5 +24,6 @@ module.exports = {
     "react/prefer-stateless-function":0,
     "react/no-did-mount-set-state":0,
     "object-curly-newline":0,
+    "prefer-destructuring":0,
   },
 };
