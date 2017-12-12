@@ -1,5 +1,6 @@
 import update from 'react-addons-update';
 import {
+  CHANGE_STATUS,
   ORDER_WAITING,
   ORDER_SUCCESS,
   ORDER_FAILURE,
@@ -14,12 +15,27 @@ const initialState = {
   },
   getOrdered: {
     status: 'INIT',
-    ordered: undefined,
+    ordered: [],
   },
 };
 
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
+    case CHANGE_STATUS: {
+      const { ordered } = state.getOrdered;
+      const foundIndex = ordered.findIndex(o => o._id === action._id);
+      if (foundIndex > -1) {
+        const updatedTarget = update(ordered[foundIndex], {
+          status: { $set: action.status },
+        });
+        return update(state, {
+          getOrdered: {
+            ordered: { $splice: [[foundIndex, 1, updatedTarget]] },
+          },
+        });
+      }
+      return state;
+    }
     case ORDER_WAITING:
       return update(state, {
         order: {
@@ -55,7 +71,7 @@ export const reducer = (state = initialState, action) => {
       return update(state, {
         getOrdered: {
           status: { $set: 'FAILURE' },
-          ordered: { $set: undefined },
+          ordered: { $set: [] },
         },
       });
     default:

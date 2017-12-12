@@ -8,7 +8,6 @@
 
 // To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
 // This link also includes instructions on opting out of this behavior.
-import * as pushConfig from './pushConfig';
 
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
@@ -42,28 +41,7 @@ function registerValidSW(swUrl) {
           }
         };
       };
-      // push
-      return registration.pushManager.getSubscription()
-        .then((subscription) => {
-          if (subscription) {
-            return subscription;
-          }
-          return registration.pushManager.subscribe({ userVisibleOnly: true });
-        });
-    })
-    .then((subscription) => {
-      console.log('subscription');
-      console.log(subscription);
-      const rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
-      const key = rawKey ?
-        btoa(String.fromCharCode.apply(null, new Uint8Array(rawKey))) : '';
-      const rawAuthSecret = subscription.getKey ? subscription.getKey('auth') : '';
-      const authSecret = rawAuthSecret ?
-        btoa(String.fromCharCode.apply(null, new Uint8Array(rawAuthSecret))) : '';
-      const endPoint = subscription.endpoint;
-      pushConfig.set('endPoint', endPoint);
-      pushConfig.set('key', key);
-      pushConfig.set('authSecret', authSecret);
+
     })
     .catch(error => {
       console.error('Error during service worker registration:', error);

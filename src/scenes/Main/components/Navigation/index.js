@@ -1,6 +1,7 @@
 import React from 'react';
 import { withStyles } from 'material-ui/styles';
 import BottomNavigation, { BottomNavigationButton } from 'material-ui/BottomNavigation';
+import Badge from 'material-ui/Badge';
 
 const styles = theme => ({
   root: {

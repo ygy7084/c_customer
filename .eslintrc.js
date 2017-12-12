@@ -25,5 +25,6 @@ module.exports = {
     "react/no-did-mount-set-state":0,
     "object-curly-newline":0,
     "prefer-destructuring":0,
+    "react/sort-comp":0,
   },
 };

@@ -17,86 +17,84 @@ class OrderedItem extends React.Component {
   render() {
     const { classes, ordered } = this.props;
     return (
-      !ordered ?
-        <div
-          className="noOrderedItem"
-        >
-          <Typography type="headline" align="center">
-            주문 내역이 없습니다.
-          </Typography>
-        </div> :
-        <Paper
-          className={classes.paper}
-        >
-          <div>
-            {
-              ordered.shop && ordered.shop.name ?
-                <Typography type="title" align="center">
-                  {
-                    ordered.shop.name
-                  }
-                </Typography> : null
-            }
-            {
-              ordered.shop && ordered.shop.phone ?
-                <a href={`tel:+${ordered.shop.phone}`}>
-                  <Typography type="subheading" align="center">
-                    {
-                      ordered.shop.phone
-                    }
-                  </Typography>
-                </a> : null
-            }
-          </div>
+      <Paper
+        className={classes.paper}
+      >
+        <div>
           {
-            ordered.products.map((product) => {
-              return (
-                <div key={product._id}>
-                  <Typography type="headline" component="h3">
-                    {product.name}
-                  </Typography>
-                  <Typography type="body1" component="p">
-                    개수 : {product.number}
-                  </Typography>
-                  <Typography type="body1" component="p">
-                    가격 : {product.price}
-                  </Typography>
-                  {
-                    product.options && product.options.length ?
-                      <Typography type="body1" component="p">
-                        옵션 : {product.options.map((option) => {
-                        const selections = option.selections.map(selection =>
-                          `${selection.name}(${selection.price}원)`
-                        ).join(', ');
-                        return `${option.name}[${selections}]`;
-                      }).join(', ')}
-                      </Typography> : null
-                  }
-                </div>
-              );
-            })
+            ordered.shop && ordered.shop.name ?
+              <Typography type="title" align="center">
+                {
+                  ordered.shop.name
+                }
+              </Typography> : null
           }
-          <Typography type="subheading" align="center">
-            {`총액: ${ordered.wholePrice}`}
-          </Typography>
-          <Typography type="subheading" align="center">
-            {new Date(ordered.datetime).toLocaleString()}
-          </Typography>
           {
-            ordered.status === 0 ?
-              <div className="orderStatus orderStatus_waiting">
-                <Typography type="headline" align="center">
-                  준비 중
+            ordered.shop && ordered.shop.phone ?
+              <a href={`tel:+${ordered.shop.phone}`}>
+                <Typography type="subheading" align="center">
+                  {
+                    ordered.shop.phone
+                  }
                 </Typography>
-              </div> :
-            ordered.status === 1 ?
-              <div className="orderStatus orderStatus_complete">
-                <Typography type="headline" align="center" color="inherit">
-                  완료
-                </Typography>
-              </div> : null
+              </a> : null
           }
-        </Paper>
+        </div>
+        {
+          ordered.products.map((product) => {
+            return (
+              <div key={product._id}>
+                <Typography type="headline" component="h3">
+                  {product.name}
+                </Typography>
+                <Typography type="body1" component="p">
+                  개수 : {product.number}
+                </Typography>
+                <Typography type="body1" component="p">
+                  가격 : {product.price}
+                </Typography>
+                {
+                  product.options && product.options.length ?
+                    <Typography type="body1" component="p">
+                      옵션 : {product.options.map((option) => {
+                      const selections = option.selections.map(selection =>
+                        `${selection.name}(${selection.price}원)`
+                      ).join(', ');
+                      return `${option.name}[${selections}]`;
+                    }).join(', ')}
+                    </Typography> : null
+                }
+              </div>
+            );
+          })
+        }
+        <Typography type="subheading" align="center">
+          {`총액: ${ordered.wholePrice}`}
+        </Typography>
+        <Typography type="subheading" align="center">
+          {new Date(ordered.datetime).toLocaleString()}
+        </Typography>
+        {
+          ordered.status === 0 ?
+            <div className="orderStatus orderStatus_waiting">
+              <Typography type="headline" align="center">
+                준비 중
+              </Typography>
+            </div> :
+          ordered.status === 1 ?
+            <div className="orderStatus orderStatus_complete">
+              <Typography type="headline" align="center" color="inherit">
+                완료
+              </Typography>
+            </div> :
+          ordered.status === 2 ?
+            <div className="orderStatus orderStatus_canceled">
+              <Typography type="headline" align="center">
+                취소 됨
+              </Typography>
+            </div> : null
+        }
+      </Paper>
     );
   }
 }

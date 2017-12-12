@@ -1,6 +1,15 @@
 /* global fetch */
 import * as loader from '../../../../data/loader/actions';
 
+export const CHANGE_STATUS = 'Main/data/order/CHANGE_STATUS';
+export const changeStatus = ({ _id, status }) => {
+  return dispatch => dispatch({
+    type: CHANGE_STATUS,
+    _id,
+    status,
+  });
+};
+
 export const ORDER_WAITING = 'Main/data/order/ORDER_WAITING';
 export const ORDER_SUCCESS = 'Main/data/order/ORDER_SUCCESS';
 export const ORDER_FAILURE = 'Main/data/order/ORDER_FAILURE';
@@ -72,16 +81,22 @@ const getOrderedFailure = (error) => {
     error,
   };
 };
-export const getOrderedRequest = (orderCookie) => {
+export const getOrderedRequest = (customerId) => {
   return (dispatch) => {
+    if (!customerId) {
+      return dispatch(getOrderedFailure({
+        error: null,
+        message: '계정 정보가 없어, 주문 내역을 불러올 수 없습니다.',
+      }));
+    }
     dispatch(loader.on());
     dispatch(getOrderedWaiting());
-    return fetch('/auth', {
+    return fetch('/api/order/customerordered', {
       method: 'GET',
       headers: {
         pragma: 'no-cache',
         'cache-control': 'no-cache',
-        Authorization: `Bearer ${orderCookie}`
+        Authorization: `Bearer ${customerId}`
       },
     })
       .then((res) => {

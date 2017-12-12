@@ -8,9 +8,6 @@ import {
   Redirect,
 } from 'react-router-dom';
 import { push } from 'react-router-redux';
-import Badge from 'material-ui/Badge';
-import DoneIcon from 'material-ui-icons/ShoppingCart';
-import IconButton from 'material-ui/IconButton';
 import * as noticeDialogActions from '../../../../data/noticeDialog/actions';
 import * as productActions from '../../data/product/actions';
 import MenuList from './components/MenuList';
@@ -22,6 +19,9 @@ import configure from '../../../../modules/configure';
 class Menu extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      selectedItem: null,
+    };
     this.productRetrieveMany = this.productRetrieveMany.bind(this);
     this.productRetrieveOne = this.productRetrieveOne.bind(this);
     this.handleProductSelect = this.handleProductSelect.bind(this);
@@ -52,6 +52,9 @@ class Menu extends React.Component {
       });
   }
   handleProductSelect(product) {
+    this.setState({
+      selectedItem:
+        this.props.productRetrieveMany.products.find(o => o._id === product._id) });
     this.props.changePage(`${this.props.match.url}/${product._id}`);
   }
   handleStockAdd(stock) {
@@ -60,7 +63,7 @@ class Menu extends React.Component {
   }
   handleBuy(item) {
     this.props.handleStockAdd(item);
-    this.props.changePage(`${this.props.match.url}/ordersheet`);
+    this.props.changePage('/order/ordersheet');
   }
   render() {
     const {
@@ -68,12 +71,9 @@ class Menu extends React.Component {
       match,
       productRetrieveOne,
       productRetrieveMany,
-      inStock,
-      handleStockCancel,
-      handleOrderStart,
     } = this.props;
-    let item;
-    if (productRetrieveOne.status === 'SUCCESS') {
+    let item = JSON.parse(JSON.stringify(this.state.selectedItem));
+    if (!item && productRetrieveOne.status === 'SUCCESS') {
       item = JSON.parse(JSON.stringify(productRetrieveOne.product));
     }
     if (item && item.pictures) {
@@ -93,19 +93,6 @@ class Menu extends React.Component {
           onClick={this.handleProductSelect}
         />
         <Switch>
-          <Route
-            path={`${match.url}/ordersheet`}
-            render={() => (
-              inStock.length ?
-                <OrderSheet
-                  inStock={inStock}
-                  goBack={() => changePage('/menu')}
-                  handleStockCancel={handleStockCancel}
-                  handleOrderStart={handleOrderStart}
-                /> :
-                <Redirect to={`${match.url}`} />
-            )}
-          />
           <Route
             path={`${match.url}/:id`}
             render={({ match }) => (

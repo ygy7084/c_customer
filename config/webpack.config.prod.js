@@ -306,7 +306,7 @@ module.exports = {
         }
         console.log(message);
       },
-      importScripts: ['/custom-service-worker.js'],
+      importScripts: [`${publicUrl}/custom-service-worker.js?${new Date().getTime()}`],
       minify: false,
       // For unknown URLs, fallback to the index page
       navigateFallback: `${publicUrl}/index.html`,

@@ -1,60 +1,31 @@
+/* global Notification, navigator */
 import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import {
   Route,
-  Switch,
   withRouter,
 } from 'react-router-dom';
 import { push } from 'react-router-redux';
-import OrderIcon from 'material-ui-icons/ShoppingCart';
-import MenuIcon from 'material-ui-icons/Menu';
-import ShopIcon from 'material-ui-icons/LocationOn';
-import MyInfoIcon from 'material-ui-icons/AccountBox';
-import io from 'socket.io-client';
 import Cookies from 'js-cookie';
-import Navigation from './components/Navigation';
-import NfcConfirm from './components/NfcConfirm';
-import CustomerConfirm from './components/CustomerConfirm';
+import update from 'react-addons-update';
 import Shop from './scenes/Shop';
 import Menu from './scenes/Menu';
-import MyInfo from './scenes/MyInfo';
 import Order from './scenes/Order';
+import MyInfo from './scenes/MyInfo';
+import Navigation from './scenes/Navigation';
+import NfcConfirm from './components/NfcConfirm';
+import CustomerConfirm from './components/CustomerConfirm';
+import Layout from './components/Layout';
+import WebPushPermission from './components/WebPushPermission';
+import * as socketActions from './data/socket/actions';
 import * as orderActions from './data/order/actions';
 import * as shopActions from './data/shop/actions';
 import * as nfcActions from './data/nfc/actions';
 import * as customerActions from './data/customer/actions';
+import * as webPushActions from './data/webPush/actions';
 import * as noticeDialogActions from '../../data/noticeDialog/actions';
-import * as pushConfig from '../../pushConfig';
 
-let socket;
-const navigations = [
-  {
-    name: '매장',
-    path: '/',
-    exact: true,
-    icon: ShopIcon,
-    scene: Shop,
-  },
-  {
-    name: '메뉴',
-    path: '/menu',
-    icon: MenuIcon,
-    scene: Menu,
-  },
-  {
-    name: '주문',
-    path: '/order',
-    icon: OrderIcon,
-    scene: Order,
-  },
-  {
-    name: '나',
-    path: '/myinfo',
-    icon: MyInfoIcon,
-    scene: MyInfo,
-  }
-];
 class Main extends React.Component {
   constructor(props) {
     super(props);
@@ -64,49 +35,63 @@ class Main extends React.Component {
       customerConfirmShow: false,
       customerConfirmPhoneRequired: false,
     };
+    this.subscribeWebPush = this.subscribeWebPush.bind(this);
+    this.unsubscribeWebPush = this.unsubscribeWebPush.bind(this);
     this.getOrdered = this.getOrdered.bind(this);
     this.getNfc = this.getNfc.bind(this);
     this.getCustomer = this.getCustomer.bind(this);
     this.shopRetrieveOne = this.shopRetrieveOne.bind(this);
     this.inputCustomerPhone = this.inputCustomerPhone.bind(this);
-    this.handleNavigationClick = this.handleNavigationClick.bind(this);
     this.handleStockAdd = this.handleStockAdd.bind(this);
-    this.handleStockCancel = this.handleStockCancel.bind(this);
+    this.handleStockRemove = this.handleStockRemove.bind(this);
     this.handleOrderStart = this.handleOrderStart.bind(this);
     this.handleNfcConfirm = this.handleNfcConfirm.bind(this);
     this.handleNfcNotConfirm = this.handleNfcNotConfirm.bind(this);
     this.handleCustomerConfirm = this.handleCustomerConfirm.bind(this);
     this.handleCustomerNotConfirm = this.handleCustomerNotConfirm.bind(this);
     this.handleOrder = this.handleOrder.bind(this);
+    this.handleLogout = this.handleLogout.bind(this);
+    this.removeNfc = this.removeNfc.bind(this);
     this.shopRetrieveOne();
-    const orderCookie = Cookies.get('order');
-    if (orderCookie && orderCookie !== '') {
-      this.getOrdered(orderCookie);
+    const nfcId = Cookies.get('nfc');
+    if (nfcId && nfcId !== '') {
+      this.getNfc(nfcId);
     }
-    const nfcCookie = Cookies.get('nfc');
-    if (nfcCookie && nfcCookie !== '') {
-      this.getNfc(nfcCookie);
-    }
-    const customerCookie = Cookies.get('customer');
-    if (customerCookie && customerCookie !== '') {
-      this.getCustomer(customerCookie);
-    }
-  }
-  getOrdered(orderCookie) {
-    this.props.getOrderedRequest(orderCookie)
-      .then((data) => {
-        if (this.props.getOrdered.status === 'SUCCESS') {
-          if (!socket) {
-            socket = io();
-            socket.on('delivered', (_id) => {
-              const orderCookie = Cookies.get('order');
-              if (orderCookie === _id) {
-                this.getOrdered(orderCookie);
-                this.props.changePage('/order');
+    const customerId = Cookies.get('customer');
+    if (customerId && customerId !== '') {
+      this.getCustomer(customerId)
+        .then(() => {
+          this.getOrdered(customerId);
+          this.props.isWebPushSupported()
+            .then(() => {
+              if (this.props.webPush.status === webPushActions.SUPPORTED) {
+                this.props.initWebPush();
               }
             });
-          }
-          if (this.props.getOrdered.ordered.status === 0) {
+        });
+    }
+    const inStockSaved = Cookies.get('inStock');
+    if (inStockSaved && inStockSaved !== '') {
+      const parsed = JSON.parse(inStockSaved);
+      if (Array.isArray(parsed)) {
+        this.state.inStock = parsed;
+      }
+    }
+  }
+  componentWillUnmount() {
+    this.props.socketDisconnect();
+  }
+  subscribeWebPush() {
+    return this.props.subscribeWebPush();
+  }
+  unsubscribeWebPush() {
+    this.props.unsubscribeWebPush();
+  }
+  getOrdered(customerId) {
+    this.props.getOrderedRequest(customerId)
+      .then((data) => {
+        if (this.props.getOrdered.status === 'SUCCESS') {
+          if (this.props.getOrdered.ordered.some(o => o.status === 0)) {
             this.props.changePage('/order');
           }
         } else if (data.error) {
@@ -117,8 +102,8 @@ class Main extends React.Component {
         this.props.showError(data);
       });
   }
-  getNfc(nfcCookie) {
-    this.props.getNfcRequest(nfcCookie)
+  getNfc(nfcId) {
+    this.props.getNfcRequest(nfcId)
       .then((data) => {
         if (this.props.getNfc.status === 'FAILURE') {
           throw data;
@@ -128,8 +113,12 @@ class Main extends React.Component {
         this.props.showError(data);
       });
   }
-  getCustomer(customerCookie) {
-    this.props.getCustomerRequest(customerCookie)
+  getCustomer(customerId) {
+    // 로그인됨과 동시에 소켓 연결
+    if (customerId) {
+      this.props.socketConnectionRequest();
+    }
+    return this.props.getCustomerRequest(customerId)
       .then((data) => {
         if (this.props.getCustomer.status === 'FAILURE') {
           throw data;
@@ -161,52 +150,87 @@ class Main extends React.Component {
         this.props.showError(data);
       });
   }
-  handleNavigationClick(clicked) {
-    this.props.changePage(clicked.path);
-  }
   handleStockAdd(stock) {
     const s = stock;
     s.id = new Date().getTime();
-    this.setState({
-      inStock: this.state.inStock.concat(s),
-    });
+    const inStockNew = update(
+      this.state.inStock, { $push: [s] });
+    this.setState({ inStock: inStockNew });
+    Cookies.set('inStock', JSON.stringify(inStockNew));
   }
-  handleStockCancel(id) {
-    const inStock = JSON.parse(JSON.stringify(this.state.inStock));
-    const found = inStock.findIndex(o => o.id === id);
-    inStock.splice(found, 1);
+  handleStockRemove(id) {
+    let inStockNew = this.state.inStock;
+    if (id) {
+      const foundIndex = this.state.inStock.findIndex(o => o.id === id);
+      if (foundIndex > -1) {
+        inStockNew = update(
+          this.state.inStock, { $splice: [[foundIndex, 1]] },
+        );
+      }
+    } else {
+      inStockNew = [];
+    }
     this.setState({
-      inStock,
+      inStock: inStockNew,
     });
+    Cookies.set('inStock', JSON.stringify(inStockNew));
   }
+  // 주문 시작
   handleOrderStart() {
     const { getCustomer, getNfc } = this.props;
-    const { customer } = getCustomer;
+    const customer = getCustomer.data;
     const { nfc } = getNfc;
-    if (nfc) {
-      this.setState({
-        nfcConfirmShow: true,
+    this.props.subscribeWebPush()
+      .then(() => {
+        const webPush = this.props.webPush;
+        if (nfc) {
+          // nfc 확인 알림
+          this.setState({
+            nfcConfirmShow: true,
+          });
+        } else if (customer) {
+          // 고객 정보 있으면 바로 주문
+          if (
+            webPush.status === webPushActions.SUBSCRIBED && (
+              !Array.isArray(customer.webPush) ||
+              !customer.webPush.find(o => o.endpoint === webPush.endpoint)
+            )
+          ) {
+            // 웹 푸시 구독했으나 기존 DB에 없을 시 등록
+            this.props.addCustomerWebPushRequest(customer._id, webPush.endpoint, webPush.keys)
+              .then((data) => {
+                if (this.props.addCustomerWebPush.status === 'SUCCESS') {
+                  this.handleOrder();
+                } else if (data.error) {
+                  throw data;
+                }
+              })
+              .catch((data) => {
+                this.props.showError(data);
+              });
+          } else {
+            this.handleOrder();
+          }
+        } else {
+          // nfc, 고객 정보 없으면 고객 정보 등록 (웹 푸시 불가 시 고객 정보 등록 강제)
+          this.setState({
+            customerConfirmShow: true,
+            customerConfirmPhoneRequired: webPush.status !== webPushActions.SUBSCRIBED,
+          });
+        }
       });
-    } else if (customer) {
-      this.setState({
-        nfcConfirmShow: false,
-      });
-      this.handleOrder();
-    } else {
-      this.setState({
-        customerConfirmShow: true,
-        customerConfirmPhoneRequired: true,
-      });
-    }
   }
   handleNfcConfirm() {
-    const { customer } = this.props.getCustomer;
+    // nfc 확인 알림 승인 (NFC 위치 정보 맞음)
+    const customer = this.props.getCustomer.data;
     if (customer) {
+      // 고객 정보 있을 시, 바로 주문
       this.setState({
         nfcConfirmShow: false,
       });
       this.handleOrder();
     } else {
+      // 고객 정보 없을 시, 고객 정보 입력 요청
       this.setState({
         nfcConfirmShow: false,
         customerConfirmShow: true,
@@ -215,16 +239,19 @@ class Main extends React.Component {
     }
   }
   handleNfcNotConfirm() {
+    // nfc 확인 알림 미승인 (NFC 위치 정보 안맞음);
     Cookies.remove('nfc');
     this.props.getNfcRequest()
       .then(() => {
-        const { customer } = this.props.getCustomer;
+        const customer = this.props.getCustomer.data;
         if (customer) {
+          // 고객 정보 있으면, 바로 주문
           this.setState({
             nfcConfirmShow: false,
           });
           this.handleOrder();
         } else {
+          // 고객 정보 없으면 등록 강제
           this.setState({
             nfcConfirmShow: false,
             customerConfirmShow: true,
@@ -242,20 +269,14 @@ class Main extends React.Component {
         if (this.props.inputCustomerPhone.status === 'FAILURE') {
           throw data;
         } else {
-          const customerCookie = Cookies.get('customer');
-          if (customerCookie && customerCookie !== '') {
-            this.props.getCustomerRequest(customerCookie)
-              .then((data) => {
-                if (this.props.getCustomer.status === 'FAILURE') {
-                  throw data;
-                }
+          const customerId = Cookies.get('customer');
+          if (customerId && customerId !== '') {
+            this.getCustomer(customerId)
+              .then(() => {
                 this.setState({
                   customerConfirmShow: false,
                 });
                 this.handleOrder();
-              })
-              .catch((data) => {
-                this.props.showError(data);
               });
           }
         }
@@ -265,13 +286,29 @@ class Main extends React.Component {
       });
   }
   handleCustomerNotConfirm() {
-    this.setState({
-      customerConfirmShow: false,
-    });
-    this.handleOrder();
+    this.props.makeNonMemberCustomerRequest()
+      .then((data) => {
+        if (this.props.makeNonMemberCustomer.status === 'FAILURE') {
+          throw data;
+        } else {
+          const customerId = Cookies.get('customer');
+          if (customerId && customerId !== '') {
+            this.getCustomer(customerId)
+              .then(() => {
+                this.setState({
+                  customerConfirmShow: false,
+                });
+                this.handleOrder();
+              });
+          }
+        }
+      })
+      .catch((data) => {
+        this.props.showError(data);
+      });
   }
   handleOrder() {
-    const { customer } = this.props.getCustomer;
+    const customer = this.props.getCustomer.data;
     const { nfc } = this.props.getNfc;
     let place;
     if (nfc) {
@@ -303,24 +340,22 @@ class Main extends React.Component {
         wholePrice += o.basePrice * o.number;
       }
     });
-    this.props.orderRequest({
+    const { endpoint, keys } = this.props.webPush;
+    const request = {
       shop,
       nfc,
       place,
       customer,
       products,
       wholePrice,
-      endPoint: pushConfig.get('endPoint'),
-      keys: {
-        key: pushConfig.get('key'),
-        authSecret: pushConfig.get('authSecret'),
-      },
-    })
+      endpoint,
+      keys,
+    };
+    this.props.orderRequest(request)
       .then((data) => {
         if (this.props.order.status === 'SUCCESS') {
-          this.setState({ inStock: [] });
-          const orderCookie = Cookies.get('order');
-          this.getOrdered(orderCookie);
+          this.handleStockRemove();
+          this.getOrdered(customer._id);
         } else {
           throw data;
         }
@@ -329,38 +364,98 @@ class Main extends React.Component {
         this.props.showError(data);
       });
   }
+  handleLogout() {
+    // 중복 코드 수정 필요
+    if (this.props.webPush.status === webPushActions.SUBSCRIBED) {
+      const customer = this.props.getCustomer.data;
+      this.props.removeCustomerWebPushRequest(customer._id, this.props.webPush.endpoint)
+        .then(() => {
+          return this.props.unsubscribeWebPush();
+        })
+        .then(() => {
+          Cookies.remove('customer');
+          this.props.getCustomerRequest();
+          this.props.getOrderedRequest();
+          this.props.socketDisconnect();
+          this.handleStockRemove();
+        })
+        .catch(() => {
+          Cookies.remove('customer');
+          this.props.getCustomerRequest();
+          this.props.getOrderedRequest();
+          this.props.socketDisconnect();
+          this.handleStockRemove();
+        });
+    } else {
+      Cookies.remove('customer');
+      this.props.getCustomerRequest();
+      this.props.getOrderedRequest();
+      this.props.socketDisconnect();
+      this.handleStockRemove();
+    }
+  }
+  removeNfc() {
+    Cookies.remove('nfc');
+    this.props.getNfcRequest()
+      .then(() => {})
+      .catch((data) => {
+        this.props.showError(data);
+      });
+  }
   render() {
-    const { getShop, getOrdered, getNfc } = this.props;
+    const { getShop, getOrdered, getNfc, webPush } = this.props;
     return (
       <div style={{ height: '100%' }}>
-        <Route render={props => (
-          <Navigation
-            handleClick={this.handleNavigationClick}
-            items={navigations}
-            {...props}
-          />)}
+        <Route render={() =>
+          <Navigation numOfStock={this.state.inStock.length} />}
         />
-        {
-          navigations.map(Item => (
-            <Route
-              key={Item.path}
-              path={Item.path}
-              exact={Item.exact}
-              render={() => (
-                <div style={{ height: '100%' }}>
-                  <Item.scene
-                    handleStockAdd={Item.name === '메뉴' ? this.handleStockAdd : undefined}
-                    handleStockCancel={Item.name === '메뉴' ? this.handleStockCancel : undefined}
-                    handleOrderStart={Item.name === '메뉴' ? this.handleOrderStart : undefined}
-                    inStock={this.state.inStock}
-                    ordered={Item.name === '주문' ? getOrdered.ordered : undefined}
-                    shop={getShop.shop}
-                  />
-                </div>
-              )}
-            />
-          ))
-        }
+        <Route
+          path="/"
+          exact
+          render={props => (
+            <Layout>
+              <Shop {...props} />
+            </Layout>
+          )}
+        />
+        <Route
+          path="/menu"
+          render={props => (
+            <Layout>
+              <Menu
+                handleStockAdd={this.handleStockAdd}
+                shop={getShop.shop}
+                {...props}
+              />
+            </Layout>
+          )}
+        />
+        <Route
+          path="/order"
+          render={props => (
+            <Layout>
+              <Order
+                inStock={this.state.inStock}
+                ordered={getOrdered.ordered}
+                handleStockCancel={this.handleStockRemove}
+                handleOrderStart={this.handleOrderStart}
+                {...props}
+              />
+            </Layout>
+          )}
+        />
+        <Route
+          path="/myinfo"
+          render={props => (
+            <Layout>
+              <MyInfo
+                handleLogout={this.handleLogout}
+                removeNfc={this.removeNfc}
+                {...props}
+              />
+            </Layout>
+          )}
+        />
         {
           this.state.nfcConfirmShow ?
             <NfcConfirm
@@ -383,6 +478,12 @@ class Main extends React.Component {
               phoneRequired={this.state.customerConfirmPhoneRequired}
             /> : null
         }
+        <WebPushPermission
+          open={[webPushActions.PROMPT, webPushActions.IDLE].includes(webPush.status)}
+          allowRequestAgain={webPush.status === webPushActions.IDLE}
+          requestAgain={this.subscribeWebPush}
+          onClose={this.props.denyWebPush}
+        />
       </div>
     );
   }
@@ -392,8 +493,13 @@ const mapStateToProps = state => ({
   getOrdered: state.main.data.order.getOrdered,
   getShop: state.main.data.shop.getShop,
   getNfc: state.main.data.nfc.getNfc,
-  getCustomer: state.main.data.customer.getCustomer,
-  inputCustomerPhone: state.main.data.customer.inputCustomerPhone,
+  getCustomer: state.main.data.customer.get,
+  addCustomerWebPush: state.main.data.customer.addWebPush,
+  removeCustomerWebPush: state.main.data.customer.removeWebPush,
+  inputCustomerPhone: state.main.data.customer.inputPhone,
+  makeNonMemberCustomer: state.main.data.customer.makeNonMember,
+  socketConnection: state.main.data.socket.connection,
+  webPush: state.main.data.webPush,
 });
 const mapDispatchToProps = dispatch => bindActionCreators({
   changePage: path => push(path),
@@ -402,10 +508,21 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   showError: noticeDialogActions.error,
   orderRequest: orderActions.orderRequest,
   getOrderedRequest: orderActions.getOrderedRequest,
+  changeOrderedStatus: orderActions.changeStatus,
   getShopRequest: shopActions.getShopRequest,
   getNfcRequest: nfcActions.getNfcRequest,
-  getCustomerRequest: customerActions.getCustomerRequest,
-  inputCustomerPhoneRequest: customerActions.inputCustomerPhoneRequest,
+  getCustomerRequest: customerActions.getRequest,
+  addCustomerWebPushRequest: customerActions.addWebPushRequest,
+  removeCustomerWebPushRequest: customerActions.removeWebPushRequest,
+  inputCustomerPhoneRequest: customerActions.inputPhoneRequest,
+  makeNonMemberCustomerRequest: customerActions.makeNonMemberRequest,
+  socketConnectionRequest: socketActions.connectionRequest,
+  socketDisconnect: socketActions.disconnect,
+  subscribeWebPush: webPushActions.subscribeWebPush,
+  unsubscribeWebPush: webPushActions.unsubscribeWebPush,
+  isWebPushSupported: webPushActions.isWebPushSupported,
+  initWebPush: webPushActions.initWebPush,
+  denyWebPush: webPushActions.denyWebPush,
 }, dispatch);
 export default withRouter(connect(
   mapStateToProps,

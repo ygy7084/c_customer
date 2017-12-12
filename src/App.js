@@ -8,7 +8,6 @@ import {
   Route,
   withRouter,
 } from 'react-router-dom';
-import * as firebase from 'firebase';
 import * as noticeDialogActions from './data/noticeDialog/actions';
 import Main from './scenes/Main';
 import { SimpleMessage } from './components/SimpleMessage';

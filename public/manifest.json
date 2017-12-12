@@ -3,14 +3,14 @@
   "name": "Mamre",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "icon.png",
       "sizes": "192x192",
       "type": "image/png"
     }
   ],
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#2196F3",
   "background_color": "#ffffff",
   "gcm_sender_id": "914857280374"
 }

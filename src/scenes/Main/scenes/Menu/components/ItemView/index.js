@@ -48,7 +48,9 @@ class ItemView extends React.Component {
     if (this.props.item && this.props.item.options && this.props.item.options.length) {
       this.state.options = initOption(this.props.item.options);
     }
-    this.props.requestItem(this.props.match.params.id);
+    if (!this.props.item) {
+      this.props.requestItem(this.props.match.params.id);
+    }
     this.handleOptionChange = this.handleOptionChange.bind(this);
   }
   componentWillReceiveProps(nextProps) {
@@ -209,7 +211,7 @@ class ItemView extends React.Component {
                     }}
                     onClick={() => handleBuy(order)}
                   >
-                    구매
+                    주문
                   </Button>
                 </DialogActions>
                 <DialogActions
@@ -269,7 +271,7 @@ class ItemView extends React.Component {
                     root: classes.fullWidth,
                   }}
                 >
-                  구매하기
+                  주문 시작
                 </Button>
               </DialogActions>
           }
