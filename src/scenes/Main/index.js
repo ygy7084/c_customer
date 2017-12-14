@@ -35,6 +35,7 @@ class Main extends React.Component {
       customerConfirmShow: false,
       customerConfirmPhoneRequired: false,
     };
+    this.addCustomerWebPush = this.addCustomerWebPush.bind(this);
     this.subscribeWebPush = this.subscribeWebPush.bind(this);
     this.unsubscribeWebPush = this.unsubscribeWebPush.bind(this);
     this.getOrdered = this.getOrdered.bind(this);
@@ -52,22 +53,21 @@ class Main extends React.Component {
     this.handleOrder = this.handleOrder.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
     this.removeNfc = this.removeNfc.bind(this);
+
     this.shopRetrieveOne();
     const nfcId = Cookies.get('nfc');
     if (nfcId && nfcId !== '') {
       this.getNfc(nfcId);
     }
     const customerId = Cookies.get('customer');
+    console.log(customerId);
     if (customerId && customerId !== '') {
+      // 로그인
+      console.log(customerId);
       this.getCustomer(customerId)
         .then(() => {
+          // 로그인 후, 주문 내역 로드
           this.getOrdered(customerId);
-          this.props.isWebPushSupported()
-            .then(() => {
-              if (this.props.webPush.status === webPushActions.SUPPORTED) {
-                this.props.initWebPush();
-              }
-            });
         });
     }
     const inStockSaved = Cookies.get('inStock');
@@ -80,6 +80,39 @@ class Main extends React.Component {
   }
   componentWillUnmount() {
     this.props.socketDisconnect();
+  }
+  addCustomerWebPush() {
+    return new Promise((resolve, reject) => {
+      const customer = this.props.getCustomer.data;
+      console.log(1, customer);
+      console.log(2, this.props.webPush.status === webPushActions.SUBSCRIBED);
+      console.log(3, !Array.isArray(customer.webPush));
+      console.log(4, !customer.webPush.find(o => o.endpoint === this.props.webPush.endpoint));
+      console.log(5,
+        !Array.isArray(customer.webPush) ||
+        !customer.webPush.find(o => o.endpoint === this.props.webPush.endpoint));
+      if (
+        customer &&
+        this.props.webPush.status === webPushActions.SUBSCRIBED && (
+          !Array.isArray(customer.webPush) ||
+          !customer.webPush.find(o => o.endpoint === this.props.webPush.endpoint)
+        )
+      ) {
+        // 웹 푸시 구독했으나 기존 DB에 없을 시 등록
+        console.log('addCustomerWebPushReqeust - start');
+        return this.props.addCustomerWebPushRequest(customer._id, this.props.webPush.endpoint, this.props.webPush.keys)
+          .then((data) => {
+            console.log('addCustomerWebPushReqeust - end');
+            if (this.props.addCustomerWebPush.status === 'SUCCESS') {
+              return resolve();
+            } else if (data.error) {
+              return reject(data);
+            }
+            return null;
+          });
+      }
+      return resolve();
+    });
   }
   subscribeWebPush() {
     return this.props.subscribeWebPush();
@@ -114,18 +147,33 @@ class Main extends React.Component {
       });
   }
   getCustomer(customerId) {
-    // 로그인됨과 동시에 소켓 연결
-    if (customerId) {
-      this.props.socketConnectionRequest();
-    }
-    return this.props.getCustomerRequest(customerId)
-      .then((data) => {
-        if (this.props.getCustomer.status === 'FAILURE') {
-          throw data;
-        }
-      })
-      .catch((data) => {
-        this.props.showError(data);
+    // 로그인됨과 동시에 소켓 연결, 웹 푸시 연결
+    return new Promise((resolve, reject) => {
+      if (customerId) {
+        this.props.socketConnectionRequest();
+        console.log('start of is Web Push Supprted');
+        this.props.isWebPushSupported()
+          .then(() => {
+            console.log('hi');
+            if (this.props.webPush.status === webPushActions.SUPPORTED) {
+              this.props.initWebPush()
+                .then(() => resolve())
+                .catch(() => resolve());
+            } else {
+              resolve();
+            }
+          });
+      } else {
+        resolve();
+      }
+    })
+      .then(() => {
+        return this.props.getCustomerRequest(customerId)
+          .then((data) => {
+            if (this.props.getCustomer.status === 'FAILURE') {
+              throw data;
+            }
+          });
       });
   }
   shopRetrieveOne() {
@@ -177,45 +225,81 @@ class Main extends React.Component {
   }
   // 주문 시작
   handleOrderStart() {
-    const { getCustomer, getNfc } = this.props;
+    console.log('handleOrderStart');
+    const { getCustomer, getNfc, webPush } = this.props;
     const customer = getCustomer.data;
     const { nfc } = getNfc;
-    this.props.subscribeWebPush()
+    console.log('before promise');
+    new Promise((resolve, reject) => {
+      // 웹 푸시 확인 작업 한번 더 시행
+      console.log('1');
+      if (this.props.webPush.status === webPushActions.UNSUPPORTED) {
+        console.log('2');
+        return resolve();
+      }
+      return this.props.isWebPushSupported()
+        .then(() => {
+          console.log('3');
+          console.log(this.props.webPush);
+          if (this.props.webPush.status === webPushActions.UNSUPPORTED) {
+            return resolve();
+          }
+          return this.props.initWebPush()
+            .then(() => {
+              console.log('4');
+              return resolve();
+            })
+            .catch(() => {
+              console.log('5');
+              return resolve();
+            });
+        });
+    })
       .then(() => {
-        const webPush = this.props.webPush;
+        console.log('second Promise');
+        if (this.props.webPush.status === webPushActions.SUPPORTED) {
+          console.log('11');
+          return this.props.subscribeWebPush()
+            .then(() => {
+              console.log('22');
+            });
+        }
+        console.log('33');
+        return null;
+      })
+      .then(() => {
+        console.log('third Promise');
+        if (![
+          webPushActions.SUBSCRIBED,
+          webPushActions.DENIED,
+          webPushActions.GRANTED,
+          webPushActions.UNSUPPORTED,
+        ].includes(this.props.webPush.status)) {
+          console.log('111');
+          // 본 코드 왔을 시, 웹 푸시는 반드시 위의 4가지 중 하나의 상태를 가져야 함.
+          throw new Error('주문 준비 취소');
+        } else if (customer) {
+          return this.addCustomerWebPush();
+        }
+        return null;
+      })
+      .then(() => {
+        console.log('last promise');
         if (nfc) {
+          console.log('nfc');
           // nfc 확인 알림
           this.setState({
             nfcConfirmShow: true,
           });
         } else if (customer) {
-          // 고객 정보 있으면 바로 주문
-          if (
-            webPush.status === webPushActions.SUBSCRIBED && (
-              !Array.isArray(customer.webPush) ||
-              !customer.webPush.find(o => o.endpoint === webPush.endpoint)
-            )
-          ) {
-            // 웹 푸시 구독했으나 기존 DB에 없을 시 등록
-            this.props.addCustomerWebPushRequest(customer._id, webPush.endpoint, webPush.keys)
-              .then((data) => {
-                if (this.props.addCustomerWebPush.status === 'SUCCESS') {
-                  this.handleOrder();
-                } else if (data.error) {
-                  throw data;
-                }
-              })
-              .catch((data) => {
-                this.props.showError(data);
-              });
-          } else {
-            this.handleOrder();
-          }
+          console.log('customer');
+          this.handleOrder();
         } else {
+          console.log('else');
           // nfc, 고객 정보 없으면 고객 정보 등록 (웹 푸시 불가 시 고객 정보 등록 강제)
           this.setState({
             customerConfirmShow: true,
-            customerConfirmPhoneRequired: webPush.status !== webPushActions.SUBSCRIBED,
+            customerConfirmPhoneRequired: this.props.webPush.status !== webPushActions.SUBSCRIBED,
           });
         }
       });
@@ -272,6 +356,7 @@ class Main extends React.Component {
           const customerId = Cookies.get('customer');
           if (customerId && customerId !== '') {
             this.getCustomer(customerId)
+              .then(() => this.addCustomerWebPush())
               .then(() => {
                 this.setState({
                   customerConfirmShow: false,
@@ -294,6 +379,7 @@ class Main extends React.Component {
           const customerId = Cookies.get('customer');
           if (customerId && customerId !== '') {
             this.getCustomer(customerId)
+              .then(() => this.addCustomerWebPush())
               .then(() => {
                 this.setState({
                   customerConfirmShow: false,
@@ -365,45 +451,34 @@ class Main extends React.Component {
       });
   }
   handleLogout() {
-    // 중복 코드 수정 필요
     if (this.props.webPush.status === webPushActions.SUBSCRIBED) {
+      // 고객 데이터 내 웹 푸시 데이터 삭제 및 브라우저 웹 푸시 구독 삭제
+      // 분기에 따른 다른 작업이 필요치 않기에 비동기 기다릴 필요 없음
       const customer = this.props.getCustomer.data;
-      this.props.removeCustomerWebPushRequest(customer._id, this.props.webPush.endpoint)
-        .then(() => {
-          return this.props.unsubscribeWebPush();
-        })
-        .then(() => {
-          Cookies.remove('customer');
-          this.props.getCustomerRequest();
-          this.props.getOrderedRequest();
-          this.props.socketDisconnect();
-          this.handleStockRemove();
-        })
-        .catch(() => {
-          Cookies.remove('customer');
-          this.props.getCustomerRequest();
-          this.props.getOrderedRequest();
-          this.props.socketDisconnect();
-          this.handleStockRemove();
-        });
-    } else {
-      Cookies.remove('customer');
-      this.props.getCustomerRequest();
-      this.props.getOrderedRequest();
-      this.props.socketDisconnect();
-      this.handleStockRemove();
+      this.props.removeCustomerWebPushRequest(customer._id, this.props.webPush.endpoint);
+      this.props.unsubscribeWebPush();
     }
+    // 브라우저 내 고객 정보 삭제
+    // 쿠키 삭제
+    Cookies.remove('customer');
+    // 고객 정보 삭제
+    this.props.logoutCustomer();
+    // 주문 데이터 삭제
+    this.props.getOrderedRequest();
+    // 소켓 연결 끊기
+    this.props.socketDisconnect();
+    // 장바구니 삭제
+    this.handleStockRemove();
   }
   removeNfc() {
     Cookies.remove('nfc');
     this.props.getNfcRequest()
       .then(() => {})
-      .catch((data) => {
-        this.props.showError(data);
-      });
+      .catch(this.props.showError);
   }
   render() {
     const { getShop, getOrdered, getNfc, webPush } = this.props;
+    console.log(webPush);
     return (
       <div style={{ height: '100%' }}>
         <Route render={() =>
@@ -481,7 +556,7 @@ class Main extends React.Component {
         <WebPushPermission
           open={[webPushActions.PROMPT, webPushActions.IDLE].includes(webPush.status)}
           allowRequestAgain={webPush.status === webPushActions.IDLE}
-          requestAgain={this.subscribeWebPush}
+          requestAgain={this.handleOrderStart}
           onClose={this.props.denyWebPush}
         />
       </div>
@@ -512,6 +587,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   getShopRequest: shopActions.getShopRequest,
   getNfcRequest: nfcActions.getNfcRequest,
   getCustomerRequest: customerActions.getRequest,
+  logoutCustomer: customerActions.logout,
   addCustomerWebPushRequest: customerActions.addWebPushRequest,
   removeCustomerWebPushRequest: customerActions.removeWebPushRequest,
   inputCustomerPhoneRequest: customerActions.inputPhoneRequest,

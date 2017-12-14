@@ -85,6 +85,7 @@ const subscribed = (endpoint, keys) => ({
 const unsubscribed = () => ({
   type: UNSUBSCRIBED,
 });
+
 export const isWebPushSupported = () => {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
@@ -96,7 +97,19 @@ export const isWebPushSupported = () => {
         // 웹 푸시 지원 X
         return resolve(dispatch(unsupported()));
       }
-      return resolve(dispatch(supported()));
+      // 서비스 워커 초기화 타임 아웃 시, Unsupported
+      console.log('starttimer');
+      const timer = setTimeout(() => {
+        resolve(dispatch(unsupported()));
+      }, 5000);
+      return navigator.serviceWorker.ready
+        .then(() => {
+          clearTimeout(timer);
+          return resolve(dispatch(supported()));
+        })
+        .catch((e) => {
+          return resolve(dispatch(unsupported()));
+        });
     });
   };
 };
@@ -109,7 +122,7 @@ export const initWebPush = () => {
             // 구독 완료
             return resolve(dispatch(subscribed(subscription.endpoint, subscription.keys)));
           }
-          return resolve(dispatch(unsubscribed()));
+          return resolve();
         })
         .catch(err => reject(err));
     });
@@ -129,6 +142,7 @@ export const subscribeWebPush = () => {
       }
       // 웹 푸시 알림 권한
       const { permission } = Notification;
+      console.log(permission);
       if (permission === 'default') {
         // 초기 상태 시, 허용 요청 띄우기
         dispatch(prompt());

@@ -1,5 +1,5 @@
 {
-  "name": "clientside",
+  "name": "Charim_Customer_Client",
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:4000",

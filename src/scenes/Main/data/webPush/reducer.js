@@ -26,10 +26,14 @@ export const reducer = (state = initialState, action) => {
     case UNSUPPORTED:
       return update(state, {
         status: { $set: UNSUPPORTED },
+        endpoint: { $set: null },
+        keys: { $set: null },
       });
     case DENIED:
       return update(state, {
         status: { $set: DENIED },
+        endpoint: { $set: null },
+        keys: { $set: null },
       });
     case GRANTED:
       return update(state, {

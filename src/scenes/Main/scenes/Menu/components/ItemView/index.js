@@ -162,26 +162,26 @@ class ItemView extends React.Component {
                   item && item.options && item.options.length ?
                     item.options.map((i) => {
                       const option = this.state.options.find(o => o.name === i.name);
-                        return (
-                          <TextField
-                            key={i.name}
-                            select
-                            fullWidth
-                            label={i.name}
-                            onChange={e => this.handleOptionChange(i, e)}
-                            value={option.selections[0].name}
-                            margin="normal"
-                          >
-                            {
-                              i.selections ? i.selections.map(o => (
-                                <MenuItem key={o.name} value={o.name}>
-                                  { o.price === 0 ? `${o.name}` : `${o.name} (+${o.price}원)`}
-                                </MenuItem>
-                              )) : null
-                            }
-                          </TextField>
-                        );
-                  }) : null
+                      return (
+                        <TextField
+                          key={i.name}
+                          select
+                          fullWidth
+                          label={i.name}
+                          onChange={e => this.handleOptionChange(i, e)}
+                          value={option.selections[0].name}
+                          margin="normal"
+                        >
+                          {
+                            i.selections ? i.selections.map(o => (
+                              <MenuItem key={o.name} value={o.name}>
+                                { o.price === 0 ? `${o.name}` : `${o.name} (+${o.price}원)`}
+                              </MenuItem>
+                            )) : null
+                          }
+                        </TextField>
+                      );
+                    }) : null
                 }
                 <TextField
                   label="가격"

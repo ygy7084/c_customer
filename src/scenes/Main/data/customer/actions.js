@@ -1,6 +1,7 @@
 /* global fetch */
 import * as loader from '../../../../data/loader/actions';
 
+// 로그인
 export const GET_WAITING = 'Main/data/customer/GET_WAITING';
 export const GET_SUCCESS = 'Main/data/customer/GET_SUCCESS';
 export const GET_FAILURE = 'Main/data/customer/GET_FAILURE';
@@ -56,6 +57,16 @@ export const getRequest = (id) => {
         }));
       })
       .catch(e => dispatch(getFailure(e)));
+  };
+};
+
+// 로그아웃
+export const logout = () => {
+  return (dispatch) => {
+    return dispatch(getFailure({
+      error: null,
+      message: '로그아웃',
+    }));
   };
 };
 
@@ -245,7 +256,6 @@ export const removeWebPushRequest = (_id, endpoint) => {
     return fetch('/api/customer/webpush/remove', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
       body: JSON.stringify({
         data: {
           _id,

@@ -57,11 +57,11 @@ class OrderedItem extends React.Component {
                   product.options && product.options.length ?
                     <Typography type="body1" component="p">
                       옵션 : {product.options.map((option) => {
-                      const selections = option.selections.map(selection =>
-                        `${selection.name}(${selection.price}원)`
-                      ).join(', ');
-                      return `${option.name}[${selections}]`;
-                    }).join(', ')}
+                        const selections = option.selections.map(selection =>
+                          `${selection.name}(${selection.price}원)`
+                        ).join(', ');
+                        return `${option.name}[${selections}]`;
+                      }).join(', ')}
                     </Typography> : null
                 }
               </div>
@@ -81,18 +81,18 @@ class OrderedItem extends React.Component {
                 준비 중
               </Typography>
             </div> :
-          ordered.status === 1 ?
-            <div className="orderStatus orderStatus_complete">
-              <Typography type="headline" align="center" color="inherit">
+            ordered.status === 1 ?
+              <div className="orderStatus orderStatus_complete">
+                <Typography type="headline" align="center" color="inherit">
                 완료
-              </Typography>
-            </div> :
-          ordered.status === 2 ?
-            <div className="orderStatus orderStatus_canceled">
-              <Typography type="headline" align="center">
+                </Typography>
+              </div> :
+              ordered.status === 2 ?
+                <div className="orderStatus orderStatus_canceled">
+                  <Typography type="headline" align="center">
                 취소 됨
-              </Typography>
-            </div> : null
+                  </Typography>
+                </div> : null
         }
       </Paper>
     );
