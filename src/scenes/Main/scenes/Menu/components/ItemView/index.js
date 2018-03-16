@@ -102,7 +102,7 @@ class ItemView extends React.Component {
           <DialogContent id="dialog" classes={{ root: classes.content }}>
             {
               item ?
-                <Card
+                <div
                   className={classes.card}
                 >
                   <div className="cardImgWrapper">
@@ -137,7 +137,7 @@ class ItemView extends React.Component {
                       { item.description }
                     </Typography>
                   </CardContent>
-                </Card> : null
+                </div> : null
             }
             <Collapse
               in={this.state.expanded}

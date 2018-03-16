@@ -17,7 +17,7 @@ class OrderedItem extends React.Component {
   render() {
     const { classes, ordered } = this.props;
     return (
-      <Paper
+      <div
         className={classes.paper}
       >
         <div>
@@ -94,7 +94,7 @@ class OrderedItem extends React.Component {
                   </Typography>
                 </div> : null
         }
-      </Paper>
+      </div>
     );
   }
 }

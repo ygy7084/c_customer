@@ -5,6 +5,7 @@
  Notification,
  btoa
 */
+import * as loader from '../../../../data/loader/actions';
 
 function getSubscription(option) {
   return navigator.serviceWorker.ready
@@ -99,15 +100,19 @@ export const isWebPushSupported = () => {
       }
       // 서비스 워커 초기화 타임 아웃 시, Unsupported
       console.log('starttimer');
+      dispatch(loader.on());
       const timer = setTimeout(() => {
+        dispatch(loader.off());
         resolve(dispatch(unsupported()));
       }, 5000);
       return navigator.serviceWorker.ready
         .then(() => {
+          dispatch(loader.off());
           clearTimeout(timer);
           return resolve(dispatch(supported()));
         })
         .catch((e) => {
+          dispatch(loader.off());
           return resolve(dispatch(unsupported()));
         });
     });
@@ -116,8 +121,10 @@ export const isWebPushSupported = () => {
 export const initWebPush = () => {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
+      dispatch(loader.on());
       return getSubscription()
         .then((subscription) => {
+          dispatch(loader.off());
           if (subscription) {
             // 구독 완료
             return resolve(dispatch(subscribed(subscription.endpoint, subscription.keys)));
@@ -142,13 +149,13 @@ export const subscribeWebPush = () => {
       }
       // 웹 푸시 알림 권한
       const { permission } = Notification;
-      console.log(permission);
       if (permission === 'default') {
         // 초기 상태 시, 허용 요청 띄우기
         dispatch(prompt());
         // 웹 푸시 알림 인지를 위한 시간 차
         return setTimeout(() =>
           Notification.requestPermission((result) => {
+            console.log('click - ', result);
             if (result === 'default') {
               // 아무 버튼 선택 안함 -> 재요청 가능하도록 (chrome 에선 3번 같은 경우 시, 자동 denied)
               return resolve(dispatch(idle()));
@@ -157,10 +164,14 @@ export const subscribeWebPush = () => {
               return resolve(dispatch(denied()));
             }
             // 허용 선택
+            console.log('loader.on()');
+            dispatch(loader.on());
             dispatch(granted());
             return getSubscription({ makeNew: true })
               .then((subscription) => {
                 // 구독 완료
+                console.log('loader.off()');
+                dispatch(loader.off());
                 return resolve(dispatch(subscribed(subscription.endpoint, subscription.keys)));
               })
               .catch(err => reject(err));
@@ -170,10 +181,12 @@ export const subscribeWebPush = () => {
         return resolve(dispatch(denied()));
       }
       // 이미 허용된 상태
+      dispatch(loader.on());
       dispatch(granted());
       return getSubscription({ makeNew: true })
         .then((subscription) => {
           // 구독 완료
+          dispatch(loader.off());
           return resolve(dispatch(subscribed(subscription.endpoint, subscription.keys)));
         })
         .catch(err => reject(err));

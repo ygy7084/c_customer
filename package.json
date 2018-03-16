@@ -71,10 +71,8 @@
     "whatwg-fetch": "^2.0.3"
   },
   "scripts": {
-    "build-css": "node-sass-chokidar src/ -o src/",
-    "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
-    "start-js": "node scripts/start.js",
-    "start": "npm-run-all -p watch-css start-js",
+    "build-css": "node-sass-chokidar src/ -o src/ && postcss src/**/*.css --use autoprefixer -d src/",
+    "start": "node scripts/start.js",
     "build": "npm run build-css && node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom"
   },
@@ -121,7 +119,7 @@
   },
   "description": "ClientSide",
   "devDependencies": {
-    "eslint": "^4.9.0",
+    "eslint": "^4.13.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",

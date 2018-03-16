@@ -56,7 +56,7 @@ class OrderSheet extends React.Component {
           <DialogContent id="dialog" classes={{ root: classes.content }}>
             {
               inStock && inStock.length ?
-                <Card
+                <div
                   className={classes.card}
                 >
                   <CardContent>
@@ -70,7 +70,7 @@ class OrderSheet extends React.Component {
                       ))
                     }
                   </CardContent>
-                </Card> : null
+                </div> : null
             }
           </DialogContent>
           <DialogActions

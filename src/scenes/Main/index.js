@@ -84,13 +84,6 @@ class Main extends React.Component {
   addCustomerWebPush() {
     return new Promise((resolve, reject) => {
       const customer = this.props.getCustomer.data;
-      console.log(1, customer);
-      console.log(2, this.props.webPush.status === webPushActions.SUBSCRIBED);
-      console.log(3, !Array.isArray(customer.webPush));
-      console.log(4, !customer.webPush.find(o => o.endpoint === this.props.webPush.endpoint));
-      console.log(5,
-        !Array.isArray(customer.webPush) ||
-        !customer.webPush.find(o => o.endpoint === this.props.webPush.endpoint));
       if (
         customer &&
         this.props.webPush.status === webPushActions.SUBSCRIBED && (
@@ -99,10 +92,8 @@ class Main extends React.Component {
         )
       ) {
         // 웹 푸시 구독했으나 기존 DB에 없을 시 등록
-        console.log('addCustomerWebPushReqeust - start');
         return this.props.addCustomerWebPushRequest(customer._id, this.props.webPush.endpoint, this.props.webPush.keys)
           .then((data) => {
-            console.log('addCustomerWebPushReqeust - end');
             if (this.props.addCustomerWebPush.status === 'SUCCESS') {
               return resolve();
             } else if (data.error) {

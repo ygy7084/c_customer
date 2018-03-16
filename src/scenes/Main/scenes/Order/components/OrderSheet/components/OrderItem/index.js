@@ -25,7 +25,7 @@ class OrderItem extends React.Component {
       });
     }
     return (
-      <Paper className={classes.root}>
+      <div className={classes.root}>
         <Typography type="headline" component="h3" >
           {order.item.name}
         </Typography>
@@ -53,7 +53,7 @@ class OrderItem extends React.Component {
             취소하기
           </Button>
         </div>
-      </Paper>
+      </div>
     );
   }
 }
